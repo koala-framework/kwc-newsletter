@@ -1,0 +1,24 @@
+{
+    "name": "koala-framework/kwc-newsletter",
+    "description": "Newsletter Component for Koala Framework",
+    "homepage": "http://www.koala-framework.org/",
+    "type": "library",
+    "require": {
+        "koala-framework/koala-framework": "~5.1",
+        "symfony/symfony": "^2.8",
+        "symfony/monolog-bundle": "^3.1",
+        "sensio/framework-extra-bundle": "^3.0",
+        "nelmio/api-doc-bundle": "^2.13"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "license": "BSD-2-Clause",
+    "autoload": {
+        "psr-0": {
+            "KwcNewsletter_": ""
+        },
+        "psr-4":{
+            "KwcNewsletter\\Bundle\\": ""
+        }
+    }
+}
