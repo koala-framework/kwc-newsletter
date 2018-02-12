@@ -11,7 +11,7 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Update_20170819SubscriberLogState e
                 'unsubscribed' => $c->trlKwf('Unsubscribed'),
             );
             foreach ($keywords as $state => $keyword) {
-                $query = "UPDATE kwc_newsletter_subscriber_logs l, kwc_newsletter_subscribers s set l.state='{$state}' WHERE l.subscriber_id=s.id AND s.newsletter_component_id='{$c->dbId}' AND LOCATE(LOWER('$keyword'), LOWER(message)) > 0";
+                $query = "UPDATE kwc_newsletter_subscriber_logs l, kwc_newsletter_subscribers s set l.state='{$state}' WHERE l.state IS NULL AND l.subscriber_id=s.id AND s.newsletter_component_id='{$c->dbId}' AND LOCATE(LOWER('$keyword'), LOWER(message)) > 0";
                 Kwf_Registry::get('db')->query($query);
             }
         }

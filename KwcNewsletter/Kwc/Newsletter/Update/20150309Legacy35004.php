@@ -5,6 +5,7 @@ class KwcNewsletter_Kwc_Newsletter_Update_20150309Legacy35004 extends Kwf_Update
     public function update()
     {
         $db = Kwf_Registry::get('db');
+
         if (!$db->query("SHOW COLUMNS FROM `kwc_newsletter_subscribers` LIKE 'newsletter_component_id'")->fetchColumn()) {
             $db->query("ALTER TABLE  `kwc_newsletter_subscribers` ADD  `newsletter_component_id` VARCHAR( 200 ) NOT NULL AFTER  `id`");
             $db->query("ALTER TABLE  `kwc_newsletter_subscribers` ADD INDEX (  `newsletter_component_id` )");

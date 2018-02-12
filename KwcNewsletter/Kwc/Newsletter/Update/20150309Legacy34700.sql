@@ -1,5 +1,3 @@
-
-
 CREATE TABLE IF NOT EXISTS `kwc_newsletter_subscribers` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `gender` enum('','female','male') NOT NULL,
