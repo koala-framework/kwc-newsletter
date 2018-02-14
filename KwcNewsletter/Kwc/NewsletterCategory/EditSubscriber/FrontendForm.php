@@ -1,0 +1,4 @@
+<?php
+class KwcNewsletter_Kwc_NewsletterCategory_EditSubscriber_FrontendForm extends KwcNewsletter_Kwc_NewsletterCategory_Subscribe_FrontendForm
+{
+}
