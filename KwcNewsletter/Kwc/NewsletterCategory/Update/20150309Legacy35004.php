@@ -5,14 +5,16 @@ class KwcNewsletter_Kwc_NewsletterCategory_Update_20150309Legacy35004 extends Kw
     public function update()
     {
         $db = Kwf_Registry::get('db');
-        $db->query("ALTER TABLE  `kwc_newsletter_categories` ADD  `newsletter_component_id` VARCHAR( 200 ) NOT NULL AFTER  `id`");
-        $db->query("ALTER TABLE  `kwc_newsletter_categories` ADD INDEX (  `newsletter_component_id` )");
-        if ($db->query("SELECT COUNT(*) FROM `kwc_newsletter_categories`")->fetchColumn()) {
-            $nlCId = $db->query("SELECT component_id FROM `kwc_newsletter` LIMIT 1")->fetchColumn();
-            if ($nlCId) {
-                $db->query("UPDATE `kwc_newsletter_categories` SET newsletter_component_id='$nlCId'");
-            } else {
-                $this->_afterUpdateRequired = true;
+        if (!$db->query("SHOW COLUMNS FROM `kwc_newsletter_categories` LIKE 'newsletter_component_id'")->fetchColumn()) {
+            $db->query("ALTER TABLE  `kwc_newsletter_categories` ADD  `newsletter_component_id` VARCHAR( 200 ) NOT NULL AFTER  `id`");
+            $db->query("ALTER TABLE  `kwc_newsletter_categories` ADD INDEX (  `newsletter_component_id` )");
+            if ($db->query("SELECT COUNT(*) FROM `kwc_newsletter_categories`")->fetchColumn()) {
+                $nlCId = $db->query("SELECT component_id FROM `kwc_newsletter` LIMIT 1")->fetchColumn();
+                if ($nlCId) {
+                    $db->query("UPDATE `kwc_newsletter_categories` SET newsletter_component_id='$nlCId'");
+                } else {
+                    $this->_afterUpdateRequired = true;
+                }
             }
         }
     }
