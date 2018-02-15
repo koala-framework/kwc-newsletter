@@ -7,8 +7,8 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_MailEditable_Component extends Kwc_
         $ret['recipientSources']['sub'] = 'KwcNewsletter_Kwc_Newsletter_Subscribe_Model';
         $ret['generators']['content']['component'] = 'KwcNewsletter_Kwc_Newsletter_Subscribe_MailEditable_Content_Component';
 
-        $ret['assetsAdmin']['files'][] = 'kwf/Kwc/Newsletter/Subscribe/MailEditable/Panel.js';
-        $ret['assetsAdmin']['files'][] = 'kwf/Kwc/Newsletter/Subscribe/MailEditable/PreviewPanel.js';
+        $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Subscribe/MailEditable/Panel.js';
+        $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Subscribe/MailEditable/PreviewPanel.js';
         return $ret;
     }
 
