@@ -17,15 +17,15 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Component extends Kwc_Directories_Item
             'class' => 'Kwf_Component_Generator_Page_Static',
             'component' => 'KwcNewsletter_Kwc_Newsletter_Detail_Mail_Component'
         );
-        $ret['assetsAdmin']['files'][] = 'kwf/Kwc/Newsletter/Detail/TabPanel.js';
-        $ret['assetsAdmin']['files'][] = 'kwf/Kwc/Newsletter/Detail/PreviewPanel.js';
-        $ret['assetsAdmin']['files'][] = 'kwf/Kwc/Newsletter/Detail/RecipientsPanel.js';
-        $ret['assetsAdmin']['files'][] = 'kwf/Kwc/Newsletter/Detail/RecipientsGridPanel.js';
-        $ret['assetsAdmin']['files'][] = 'kwf/Kwc/Newsletter/Detail/RecipientsQueuePanel.js';
-        $ret['assetsAdmin']['files'][] = 'kwf/Kwc/Newsletter/Detail/RecipientsAction.js';
-        $ret['assetsAdmin']['files'][] = 'kwf/Kwc/Newsletter/Detail/Recipients.css';
-        $ret['assetsAdmin']['files'][] = 'kwf/Kwc/Newsletter/Detail/StartNewsletterPanel.js';
-        $ret['assetsAdmin']['files'][] = 'kwf/Kwc/Newsletter/Detail/StartNewsletterPanel.scss';
+        $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Detail/TabPanel.js';
+        $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Detail/PreviewPanel.js';
+        $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Detail/RecipientsPanel.js';
+        $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Detail/RecipientsGridPanel.js';
+        $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Detail/RecipientsQueuePanel.js';
+        $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Detail/RecipientsAction.js';
+        $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Detail/Recipients.css';
+        $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Detail/StartNewsletterPanel.js';
+        $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Detail/StartNewsletterPanel.scss';
         $ret['assetsAdmin']['files'][] = 'ext2/src/widgets/StatusBar.js';
         $ret['assetsAdmin']['dep'][] = 'KwfFormDateTimeField';
         $ret['assetsAdmin']['dep'][] = 'KwfFormCards';

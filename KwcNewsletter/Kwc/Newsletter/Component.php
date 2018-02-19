@@ -30,7 +30,7 @@ class KwcNewsletter_Kwc_Newsletter_Component extends Kwc_Directories_ItemPage_Di
 
         $ret['extConfig'] = 'Kwf_Component_Abstract_ExtConfig_None';
         $ret['extConfigControllerIndex'] = 'KwcNewsletter_Kwc_Newsletter_ExtConfigEditButtons';
-        $ret['assetsAdmin']['files'][] = 'kwf/Kwc/Newsletter/Panel.js';
+        $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Panel.js';
 
         $ret['contentSender'] = 'KwcNewsletter_Kwc_Newsletter_ContentSender';
 
