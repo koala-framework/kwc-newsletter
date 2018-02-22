@@ -19,7 +19,7 @@
             "KwcNewsletter_": ""
         },
         "psr-4":{
-            "KwcNewsletter\\Bundle\\": ""
+            "KwcNewsletter\\Bundle\\": "Bundle"
         }
     }
 }
