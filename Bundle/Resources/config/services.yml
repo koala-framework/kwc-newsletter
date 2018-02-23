@@ -1,1 +1,5 @@
 services:
+    kwc_newsletter.command.newsletter:
+        class: KwcNewsletter\Bundle\Command\Newsletter
+        tags:
+            - { name: 'console.command' }
