@@ -1,6 +1,5 @@
 <?php
 class KwcNewsletter_Kwc_Newsletter_Component extends Kwc_Directories_ItemPage_Directory_Component
-    implements Kwf_Util_Maintenance_JobProviderInterface
 {
     public static function getSettings($param = null)
     {
