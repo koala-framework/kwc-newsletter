@@ -3,3 +3,8 @@ services:
         class: KwcNewsletter\Bundle\Command\Newsletter
         tags:
             - { name: 'console.command' }
+
+    kwc_newsletter.maintenance_job.start:
+        class: KwcNewsletter\Bundle\MaintenanceJob\StartJob
+        tags:
+            - { name: 'kwf.maintenance_job' }

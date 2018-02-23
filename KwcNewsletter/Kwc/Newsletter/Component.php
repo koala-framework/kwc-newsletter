@@ -37,11 +37,4 @@ class KwcNewsletter_Kwc_Newsletter_Component extends Kwc_Directories_ItemPage_Di
         $ret['menuConfig'] = 'KwcNewsletter_Kwc_Newsletter_MenuConfig';
         return $ret;
     }
-
-    public static function getMaintenanceJobs()
-    {
-        return array(
-            'KwcNewsletter_Kwc_Newsletter_StartMaintenanceJob',
-        );
-    }
 }
