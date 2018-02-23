@@ -1,7 +1,14 @@
 <?php
-class KwcNewsletter_Kwc_Newsletter_StartMaintenanceJob extends Kwf_Util_Maintenance_Job_Abstract
+namespace KwcNewsletter\Bundle\MaintenanceJob;
+
+use KwfBundle\MaintenanceJobs\AbstractJob;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Psr\Log\LoggerInterface;
+
+class StartJob extends AbstractJob
 {
-    private $_procs = array();
+    private $procs = array();
 
     public function getFrequency()
     {
@@ -10,17 +17,18 @@ class KwcNewsletter_Kwc_Newsletter_StartMaintenanceJob extends Kwf_Util_Maintena
 
     public function hasWorkload()
     {
-        $model = Kwf_Model_Abstract::getInstance('KwcNewsletter_Kwc_Newsletter_Model');
+        $model = \Kwf_Model_Abstract::getInstance('Kwc_Newsletter_Model');
 
         $select = $model->select()
-            ->where(new Kwf_Model_Select_Expr_Or(array(
-                new Kwf_Model_Select_Expr_Equal('status', 'start'),
-                new Kwf_Model_Select_Expr_And(array(
-                    new Kwf_Model_Select_Expr_Equal('status', 'startLater'),
-                    new Kwf_Model_Select_Expr_LowerEqual('start_date', new Kwf_DateTime(time())),
+            ->where(new \Kwf_Model_Select_Expr_Or(array(
+                new \Kwf_Model_Select_Expr_Equal('status', 'start'),
+                new \Kwf_Model_Select_Expr_And(array(
+                    new \Kwf_Model_Select_Expr_Equal('status', 'startLater'),
+                    new \Kwf_Model_Select_Expr_LowerEqual('start_date', new \Kwf_DateTime(time())),
                 )),
-                new Kwf_Model_Select_Expr_Equal('status', 'sending')
+                new \Kwf_Model_Select_Expr_Equal('status', 'sending')
             )));
+
         return $model->countRows($select) > 0;
     }
 
@@ -29,21 +37,28 @@ class KwcNewsletter_Kwc_Newsletter_StartMaintenanceJob extends Kwf_Util_Maintena
         return 60*60*12;
     }
 
-    public function execute($debug)
+    public function execute(LoggerInterface $logger)
     {
-        $model = Kwf_Model_Abstract::getInstance('KwcNewsletter_Kwc_Newsletter_Model');
+        $debug = false;
+        foreach ($logger->getHandlers() as $handler) {
+            if ($handler instanceof StreamHandler) {
+                $debug = $handler->getLevel() <= Logger::DEBUG;
+                break;
+            }
+        }
+
+        $model = \Kwf_Model_Abstract::getInstance('Kwc_Newsletter_Model');
 
         $select = $model->select()
-            ->where(new Kwf_Model_Select_Expr_Or(array(
-                new Kwf_Model_Select_Expr_Equal('status', 'start'),
-                new Kwf_Model_Select_Expr_And(array(
-                    new Kwf_Model_Select_Expr_Equal('status', 'startLater'),
-                    new Kwf_Model_Select_Expr_LowerEqual('start_date', new Kwf_DateTime(time())),
+            ->where(new \Kwf_Model_Select_Expr_Or(array(
+                new \Kwf_Model_Select_Expr_Equal('status', 'start'),
+                new \Kwf_Model_Select_Expr_And(array(
+                    new \Kwf_Model_Select_Expr_Equal('status', 'startLater'),
+                    new \Kwf_Model_Select_Expr_LowerEqual('start_date', new \Kwf_DateTime(time())),
                 )),
-                new Kwf_Model_Select_Expr_Equal('status', 'sending')
+                new \Kwf_Model_Select_Expr_Equal('status', 'sending')
             )));
         $rows = $model->getRows($select);
-        $activeCountRows = count($rows);
         foreach ($rows as $newsletterRow) {
 
             if ($newsletterRow->status != 'sending') {
@@ -53,31 +68,31 @@ class KwcNewsletter_Kwc_Newsletter_StartMaintenanceJob extends Kwf_Util_Maintena
                 $newsletterRow->save();
             }
 
-            if (!isset($this->_procs[$newsletterRow->id])) {
-                $this->_procs[$newsletterRow->id] = array();
+            if (!isset($this->procs[$newsletterRow->id])) {
+                $this->procs[$newsletterRow->id] = array();
             }
 
             //remove stopped processes (might stop because of memory limit or simply crash for some reason)
-            foreach ($this->_procs[$newsletterRow->id] as $k=>$p) {
+            foreach ($this->procs[$newsletterRow->id] as $k=>$p) {
                 if (!$p->isRunning()) {
-                    echo "process ".$p->getPid()." stopped...\n";
-                    unset($this->_procs[$newsletterRow->id][$k]);
+                    $logger->debug("process {$p->getPid()} stopped...");
+                    unset($this->procs[$newsletterRow->id][$k]);
                 }
             }
 
-            $s = new Kwf_Model_Select();
+            $s = new \Kwf_Model_Select();
             $s->whereEquals('newsletter_id', $newsletterRow->id);
             $s->whereNull('send_process_pid');
             if (!$newsletterRow->getModel()->getDependentModel('Queue')->countRows($s)) {
                 $newsletterRow->status = 'finished';
                 $newsletterRow->save();
-                echo "Newsletter finished.\n";
+                $logger->debug("Newsletter finished.");
 
                 //give send processes time to finish
                 sleep(5);
 
                 //delete "hanging" queue entries
-                $s = new Kwf_Model_Select();
+                $s = new \Kwf_Model_Select();
                 $s->whereEquals('newsletter_id', $newsletterRow->id);
                 foreach ($newsletterRow->getModel()->getDependentModel('Queue')->getRows($s) as $queueRow) {
                     $newsletterRow->getModel()->getDependentModel('QueueLog')->createRow(array(
@@ -88,44 +103,39 @@ class KwcNewsletter_Kwc_Newsletter_StartMaintenanceJob extends Kwf_Util_Maintena
                         'send_date' => date('Y-m-d H:i:s')
                     ))->save();
                     $msg = "Newsletter finished but queue entry with pid $queueRow->send_process_pid still exists: $queueRow->recipient_id $queueRow->searchtext";
-                    $e = new Kwf_Exception($msg);
+                    $e = new \Kwf_Exception($msg);
                     $e->logOrThrow();
-                    echo $msg."\n";
+                    $logger->debug($msg);
                     $queueRow->delete();
                 }
                 continue;
             }
 
-            if ($debug) {
-                echo count($this->_procs[$newsletterRow->id])." running processes\n";
-            }
+            $logger->info(count($this->procs[$newsletterRow->id])." running processes");
 
             $numOfProcesses = 1;
             if ($newsletterRow->mails_per_minute == 'unlimited') {
                 $numOfProcesses = 3;
             }
-            while (count($this->_procs[$newsletterRow->id]) < $numOfProcesses) {
-                $cmd = "php bootstrap.php newsletter send --newsletterId=$newsletterRow->id";
-                if ($debug) $cmd .= " --debug";
+            while (count($this->procs[$newsletterRow->id]) < $numOfProcesses) {
+                $cmd = "php bootstrap.php symfony kwc_newsletter:send --newsletterId=$newsletterRow->id";
+                if ($debug) $cmd .= " -v";
                 //if ($this->_getParam('benchmark')) $cmd .= " --benchmark";
                 //if ($this->_getParam('verbose')) $cmd .= " --verbose";
                 $descriptorspec = array(
                     1 => STDOUT,
                     2 => STDERR,
                 );
-                $p = new Kwf_Util_Proc($cmd, $descriptorspec);
-                $this->_procs[$newsletterRow->id][] = $p;
-                echo "started new process with PID ".$p->getPid().' on '.gethostname()."\n";
-                echo $cmd."\n";
+                $p = new \Kwf_Util_Proc($cmd, $descriptorspec);
+                $this->procs[$newsletterRow->id][] = $p;
+
+                $logger->debug("started new process with PID ".$p->getPid().' on '.gethostname());
+                $logger->debug($cmd);
 
                 sleep(3); //don't start all processes at the same time
             }
 
-            if ($debug) {
-                echo "Newletter $newsletterRow->id: currently sending with ".
-                    round($newsletterRow->getCurrentSpeed()).
-                    " mails/min\n";
-            }
+            $logger->info("Newletter $newsletterRow->id: currently sending with " . round($newsletterRow->getCurrentSpeed()) . " mails/min");
         }
     }
 }
