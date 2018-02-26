@@ -1,6 +1,7 @@
 imports:
     - { resource: services/command.yml }
     - { resource: services/maintenance_job.yml }
+    - { resource: services/model.yml }
 
 services:
 

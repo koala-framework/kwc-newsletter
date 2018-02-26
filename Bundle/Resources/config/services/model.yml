@@ -1,0 +1,5 @@
+services:
+    kwc_newsletter.model.subscribers:
+        class:   KwcNewsletter_Kwc_NewsletterCategory_Subscribe_Model
+        factory: ['Kwf_Model_Abstract', getInstance]
+        arguments: ['KwcNewsletter_Kwc_NewsletterCategory_Subscribe_Model']
