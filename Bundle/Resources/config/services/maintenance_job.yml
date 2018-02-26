@@ -1,0 +1,17 @@
+services:
+    kwc_newsletter.maintenance_job.start:
+            class: KwcNewsletter\Bundle\MaintenanceJob\StartJob
+            tags:
+                - { name: 'kwf.maintenance_job' }
+
+    kwc_newsletter.maintenance_job.delete_unsubscribed:
+            class: KwcNewsletter\Bundle\MaintenanceJob\DeleteUnsubscribedJob
+            arguments: [@kwc_newsletter.model.subscribers]
+            tags:
+                - { name: 'kwf.maintenance_job' }
+
+    kwc_newsletter.maintenance_job.delete_not_activated:
+            class: KwcNewsletter\Bundle\MaintenanceJob\DeleteNotActivatedJob
+            arguments: [@kwc_newsletter.model.subscribers]
+            tags:
+                - { name: 'kwf.maintenance_job' }

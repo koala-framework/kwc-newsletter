@@ -1,10 +1,7 @@
-services:
-    kwc_newsletter.command.newsletter:
-        class: KwcNewsletter\Bundle\Command\Newsletter
-        tags:
-            - { name: 'console.command' }
+imports:
+    - { resource: services/command.yml }
+    - { resource: services/maintenance_job.yml }
+    - { resource: services/model.yml }
 
-    kwc_newsletter.maintenance_job.start:
-        class: KwcNewsletter\Bundle\MaintenanceJob\StartJob
-        tags:
-            - { name: 'kwf.maintenance_job' }
+services:
+
