@@ -6,11 +6,19 @@ use Psr\Log\LoggerInterface;
 
 class DeleteNotActivatedJob extends AbstractJob
 {
+    /**
+     * @var \Kwf_Model_Abstract
+     */
     private $subscribersModel;
+    /*
+     * @var integer
+     */
+    private $deleteAfterDays;
 
-    public function __construct(\Kwf_Model_Abstract $model)
+    public function __construct(\Kwf_Model_Abstract $model, $deleteAfterDays)
     {
         $this->subscribersModel = $model;
+        $this->deleteAfterDays = $deleteAfterDays;
     }
 
     public function getFrequency()
@@ -24,7 +32,7 @@ class DeleteNotActivatedJob extends AbstractJob
         $select->whereEquals('activated', false);
         $select->where(new \Kwf_Model_Select_Expr_LowerEqual(
             new \Kwf_Model_Select_Expr_Field('last_subscribe_date'),
-            new \Kwf_Date(strtotime('-1 week'))
+            new \Kwf_Date(strtotime("-{$this->deleteAfterDays} days"))
         ));
 
         $ids = array_map(

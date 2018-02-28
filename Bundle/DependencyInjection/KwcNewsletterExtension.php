@@ -12,6 +12,15 @@ class KwcNewsletterExtension extends Extension
     {
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yml');
+
+        $configuration = new Configuration();
+        $config = $this->processConfiguration($configuration, $configs);
+
+        $def = $container->getDefinition('kwc_newsletter.maintenance_job.delete_unsubscribed');
+        $def->addArgument($config['subscribers']['delete_unsubscribed_after_days']);
+
+        $def = $container->getDefinition('kwc_newsletter.maintenance_job.delete_not_activated');
+        $def->addArgument($config['subscribers']['delete_not_activated_after_days']);
     }
 
 }
