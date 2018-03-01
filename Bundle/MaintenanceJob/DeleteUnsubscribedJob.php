@@ -6,11 +6,19 @@ use Psr\Log\LoggerInterface;
 
 class DeleteUnsubscribedJob extends AbstractJob
 {
+    /**
+     * @var \Kwf_Model_Abstract
+     */
     private $subscribersModel;
+    /*
+     * @var integer
+     */
+    private $deleteAfterDays;
 
-    public function __construct(\Kwf_Model_Abstract $model)
+    public function __construct(\Kwf_Model_Abstract $model, $deleteAfterDays)
     {
         $this->subscribersModel = $model;
+        $this->deleteAfterDays = $deleteAfterDays;
     }
 
     public function getFrequency()
@@ -24,7 +32,7 @@ class DeleteUnsubscribedJob extends AbstractJob
         $select->whereEquals('unsubscribed', true);
         $select->where(new \Kwf_Model_Select_Expr_LowerEqual(
             new \Kwf_Model_Select_Expr_Field('last_unsubscribe_date'),
-            new \Kwf_Date(strtotime('-1 year'))
+            new \Kwf_Date(strtotime("-{$this->deleteAfterDays} days"))
         ));
 
         $ids = array_map(
