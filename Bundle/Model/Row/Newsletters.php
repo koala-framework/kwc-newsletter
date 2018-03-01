@@ -1,5 +1,7 @@
 <?php
-class KwcNewsletter_Kwc_Newsletter_Row extends Kwf_Model_Proxy_Row
+namespace KwcNewsletter\Bundle\Model\Row;
+
+class Newsletters extends \Kwf_Model_Proxy_Row
 {
     public function __toString()
     {
@@ -15,7 +17,7 @@ class KwcNewsletter_Kwc_Newsletter_Row extends Kwf_Model_Proxy_Row
             $info = $this->getInfo();
             return $info['text'];
         } else if ($name == 'subject') {
-            $model = $this->getModel()->getDependentModel('Mail');
+            $model = $this->getModel()->getDependentModel('Mails');
             $id = $this->component_id . '_' . $this->id . '_mail';
             $mailRow = $model->getRow($id);
             if ($mailRow) return $mailRow->subject;
@@ -27,18 +29,18 @@ class KwcNewsletter_Kwc_Newsletter_Row extends Kwf_Model_Proxy_Row
 
     public final function send($debugOutput = false)
     {
-        throw new Kwf_Exception("moved to cli controller");
+        throw new \Kwf_Exception("moved to cli controller");
     }
 
     protected final function _sendMail($recipient, $debugOutput = false)
     {
-        throw new Kwf_Exception("moved to cli controller");
+        throw new \Kwf_Exception("moved to cli controller");
     }
 
     public function getNextQueueRow($sendProcessPid)
     {
         while (true) {
-            $model = $this->getModel()->getDependentModel('Queue');
+            $model = $this->getModel()->getDependentModel('Queues');
             $select = $model->select()
                 ->whereEquals('newsletter_id', $this->id)
                 ->whereNull('send_process_pid')
@@ -65,16 +67,16 @@ class KwcNewsletter_Kwc_Newsletter_Row extends Kwf_Model_Proxy_Row
         if (!$this->resume_date) return null;
 
         $startDate = max(time()-60, strtotime($this->resume_date));
-        $queueLogModel = $this->getModel()->getDependentModel('QueueLog');
+        $queueLogModel = $this->getModel()->getDependentModel('QueueLogs');
         $select = $queueLogModel->select()
             ->whereEquals('newsletter_id', $this->id)
-            ->where(new Kwf_Model_Select_Expr_Higher('send_date', new Kwf_DateTime($startDate)));
+            ->where(new \Kwf_Model_Select_Expr_Higher('send_date', new \Kwf_DateTime($startDate)));
         return $queueLogModel->countRows($select) / (time()-$startDate) * 60;
     }
 
     public function getInfo()
     {
-        $queue = $this->getModel()->getDependentModel('Queue');
+        $queue = $this->getModel()->getDependentModel('Queues');
         $select = $queue->select()->whereEquals('newsletter_id', $this->id);
         $ret = array();
         $ret['state']    = $this->status;
@@ -98,7 +100,6 @@ class KwcNewsletter_Kwc_Newsletter_Row extends Kwf_Model_Proxy_Row
             }
         }
 
-        $text = '';
         switch ($this->status) {
             case 'stop': $text = trlKwf('Sending stopped, cannot start again').'.'; break;
             case 'pause': $text = trlKwf('Sending paused').'.'; break;
@@ -126,7 +127,7 @@ class KwcNewsletter_Kwc_Newsletter_Row extends Kwf_Model_Proxy_Row
     public function getMailComponent()
     {
         $componentId = $this->component_id . '_' . $this->id . '_mail';
-        return Kwf_Component_Data_Root::getInstance()
+        return \Kwf_Component_Data_Root::getInstance()
             ->getComponentByDbId($componentId, array('ignoreVisible' => true))
             ->getComponent();
     }
@@ -142,7 +143,7 @@ class KwcNewsletter_Kwc_Newsletter_Row extends Kwf_Model_Proxy_Row
         } else if ($this->mails_per_minute == 'slow') {
             return 20;
         } else {
-            throw new Kwf_Exception('unknown speed');
+            throw new \Kwf_Exception('unknown speed');
         }
     }
 }
