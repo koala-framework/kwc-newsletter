@@ -4,7 +4,7 @@ class KwcNewsletter_Kwc_NewsletterCategory_Subscribe_MailEditable_Component exte
     public static function getSettings($param = null)
     {
         $ret = parent::getSettings($param);
-        $ret['recipientSources']['sub'] = 'KwcNewsletter_Kwc_NewsletterCategory_Subscribe_Model';
+        $ret['recipientSources']['sub'] = 'KwcNewsletter\Bundle\Model\Subscribers';
         return $ret;
     }
 }

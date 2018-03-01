@@ -49,7 +49,7 @@ class Newsletter extends Command
         $mailsPerMinute = $nlRow->getCountOfMailsPerMinute();
 
         // Send in loop
-        $queueLogModel = $nlRow->getModel()->getDependentModel('QueueLog');
+        $queueLogModel = $nlRow->getModel()->getDependentModel('QueueLogs');
         $count = 0; $countErrors = 0; $countNoUser = 0;
         $start = microtime(true);
         do {
@@ -171,7 +171,7 @@ class Newsletter extends Command
         $stop = microtime(true);
 
         // Write log
-        $logModel = $nlRow->getModel()->getDependentModel('Log');
+        $logModel = $nlRow->getModel()->getDependentModel('Logs');
         $row = $logModel->createRow(array(
             'newsletter_id' => $nlRow->id,
             'start' => date('Y-m-d H:i:s', floor($start)),

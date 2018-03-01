@@ -14,7 +14,7 @@ class KwcNewsletter_Kwc_NewsletterCategory_Detail_RecipientCategoryData extends 
 
     public function load($row, array $info = array())
     {
-        $model = Kwf_Model_Abstract::getInstance('KwcNewsletter_Kwc_NewsletterCategory_Subscribe_SubscriberToCategory');
+        $model = Kwf_Model_Abstract::getInstance('KwcNewsletter\Bundle\Model\SubscribersToCategories');
         $hasCategory = $model->getRow($model->select()
             ->whereEquals('subscriber_id', $row->id)
             ->whereEquals('category_id', $this->_categoryId)

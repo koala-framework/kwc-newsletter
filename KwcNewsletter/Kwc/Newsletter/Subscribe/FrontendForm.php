@@ -1,7 +1,7 @@
 <?php
 class KwcNewsletter_Kwc_Newsletter_Subscribe_FrontendForm extends Kwf_Form
 {
-    protected $_modelName = 'KwcNewsletter_Kwc_Newsletter_Subscribe_Model';
+    protected $_modelName = 'KwcNewsletter\Bundle\Model\Subscribers';
     protected $_subscribeComponentId;
     protected $_newsletterComponentId;
 

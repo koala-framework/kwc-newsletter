@@ -1,7 +1,7 @@
 <?php
 class KwcNewsletter_Kwc_Newsletter_Unsubscribe_Form_FrontendForm extends Kwf_Form
 {
-    protected $_model = 'KwcNewsletter_Kwc_Newsletter_Subscribe_Model';
+    protected $_model = 'KwcNewsletter\Bundle\Model\Subscribers';
 
     protected function _init()
     {

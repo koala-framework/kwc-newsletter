@@ -48,10 +48,7 @@ class DeleteUnsubscribedJob extends AbstractJob
             $select = new \Kwf_Model_Select();
             $select->whereEquals('subscriber_id', $ids);
             $this->subscribersModel->getDependentModel('Logs')->deleteRows($select);
-
-            if ($this->subscribersModel instanceof \KwcNewsletter_Kwc_NewsletterCategory_Subscribe_Model) {
-                $this->subscribersModel->getDependentModel('ToCategory')->deleteRows($select);
-            }
+            $this->subscribersModel->getDependentModel('ToCategories')->deleteRows($select);
         }
 
         $logger->debug("Deleted $count subscribers");

@@ -1,7 +1,7 @@
 <?php
 class KwcNewsletter_Kwc_Newsletter_Detail_MailingFormController extends Kwf_Controller_Action_Auto_Form
 {
-    protected $_model = 'KwcNewsletter_Kwc_Newsletter_Model';
+    protected $_model = 'KwcNewsletter\Bundle\Model\Newsletters';
     protected $_permissions = array('save');
 
     protected function _initFields()

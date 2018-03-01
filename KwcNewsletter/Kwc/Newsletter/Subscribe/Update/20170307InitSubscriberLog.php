@@ -7,7 +7,7 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Update_20170307InitSubscriberLog ex
 
         $db = Kwf_Registry::get('db');
         if ($db->query("SHOW COLUMNS FROM `kwc_newsletter_subscribers` LIKE 'subscribe_date'")->fetchColumn()) {
-            $rows = Kwf_Model_Abstract::getInstance('KwcNewsletter_Kwc_Newsletter_Subscribe_Model')->export(
+            $rows = Kwf_Model_Abstract::getInstance('KwcNewsletter\Bundle\Model\Subscribers')->export(
                 Kwf_Model_Abstract::FORMAT_ARRAY, array()
             );
             if (count($rows) > 1000) echo "Add initial subscriber log, this can take some time...\n";
@@ -34,7 +34,7 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Update_20170307InitSubscriberLog ex
                 );
             }
 
-            Kwf_Model_Abstract::getInstance('KwcNewsletter_Kwc_Newsletter_Subscribe_LogsModel')->import(Kwf_Model_Abstract::FORMAT_ARRAY, $data);
+            Kwf_Model_Abstract::getInstance('KwcNewsletter\Bundle\Model\SubscriberLogs')->import(Kwf_Model_Abstract::FORMAT_ARRAY, $data);
 
             $db = Kwf_Registry::get('db');
             $db->query('ALTER TABLE `kwc_newsletter_subscribers` DROP `subscribe_date`');

@@ -4,7 +4,7 @@ class KwcNewsletter_Kwc_NewsletterCategory_Detail_Mail_Component extends KwcNews
     public static function getSettings($param = null)
     {
         $ret = parent::getSettings($param);
-        $ret['recipientSources']['n']['model'] = 'KwcNewsletter_Kwc_NewsletterCategory_Subscribe_Model';
+        $ret['recipientSources']['n']['model'] = 'KwcNewsletter\Bundle\Model\Subscribers';
         return $ret;
     }
 }

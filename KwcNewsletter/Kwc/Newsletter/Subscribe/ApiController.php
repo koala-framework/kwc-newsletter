@@ -1,7 +1,7 @@
 <?php
 class KwcNewsletter_Kwc_Newsletter_Subscribe_ApiController extends Kwf_Controller_Action
 {
-    protected $_model = 'KwcNewsletter_Kwc_NewsletterCategory_Subscribe_CategoriesModel';
+    protected $_model = 'KwcNewsletter\Bundle\Model\SubscribeCategories';
     protected $_subscribe;
 
     protected function _isAllowedComponent()

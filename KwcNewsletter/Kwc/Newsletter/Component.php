@@ -19,7 +19,7 @@ class KwcNewsletter_Kwc_Newsletter_Component extends Kwc_Directories_ItemPage_Di
             'name' => trlKwfStatic('Edit subscriber')
         );
 
-        $ret['childModel'] = 'KwcNewsletter_Kwc_Newsletter_Model';
+        $ret['childModel'] = 'KwcNewsletter\Bundle\Model\Newsletters';
         $ret['flags']['hasResources'] = true;
         $ret['componentName'] = trlKwfStatic('Newsletter');
         $ret['componentIcon'] = 'email';

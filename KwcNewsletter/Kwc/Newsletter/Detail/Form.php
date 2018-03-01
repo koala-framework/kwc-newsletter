@@ -1,7 +1,7 @@
 <?php
 class KwcNewsletter_Kwc_Newsletter_Detail_Form extends Kwc_Abstract_Form
 {
-    protected $_model = 'KwcNewsletter_Kwc_Newsletter_Model';
+    protected $_model = 'KwcNewsletter\Bundle\Model\Newsletters';
 
     public function setId($id)
     {

@@ -6,7 +6,7 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNew
     protected $_defaultOrder = 'id';
     protected $_paging = 20;
     protected $_queryFields = array('id', 'email', 'firstname', 'lastname');
-    protected $_model = 'KwcNewsletter_Kwc_Newsletter_Subscribe_Model';
+    protected $_model = 'KwcNewsletter\Bundle\Model\Subscribers';
 
     public function indexAction()
     {
