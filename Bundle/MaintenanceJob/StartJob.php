@@ -9,7 +9,16 @@ use Psr\Log\LoggerInterface;
 
 class StartJob extends AbstractJob
 {
+    /**
+     * @var \Kwf_Model_Abstract
+     */
+    private $newslettersModel;
     private $procs = array();
+
+    public function __construct(\Kwf_Model_Abstract $model)
+    {
+        $this->newslettersModel = $model;
+    }
 
     public function getFrequency()
     {
@@ -18,9 +27,7 @@ class StartJob extends AbstractJob
 
     public function hasWorkload()
     {
-        $model = \Kwf_Model_Abstract::getInstance('Kwc_Newsletter_Model');
-
-        $select = $model->select()
+        $select = $this->newslettersModel->select()
             ->where(new \Kwf_Model_Select_Expr_Or(array(
                 new \Kwf_Model_Select_Expr_Equal('status', 'start'),
                 new \Kwf_Model_Select_Expr_And(array(
@@ -30,7 +37,7 @@ class StartJob extends AbstractJob
                 new \Kwf_Model_Select_Expr_Equal('status', 'sending')
             )));
 
-        return $model->countRows($select) > 0;
+        return $this->newslettersModel->countRows($select) > 0;
     }
 
     public function getMaxTime()
@@ -48,9 +55,7 @@ class StartJob extends AbstractJob
             }
         }
 
-        $model = \Kwf_Model_Abstract::getInstance('Kwc_Newsletter_Model');
-
-        $select = $model->select()
+        $select = $this->newslettersModel->select()
             ->where(new \Kwf_Model_Select_Expr_Or(array(
                 new \Kwf_Model_Select_Expr_Equal('status', 'start'),
                 new \Kwf_Model_Select_Expr_And(array(
@@ -59,7 +64,7 @@ class StartJob extends AbstractJob
                 )),
                 new \Kwf_Model_Select_Expr_Equal('status', 'sending')
             )));
-        $rows = $model->getRows($select);
+        $rows = $this->newslettersModel->getRows($select);
         foreach ($rows as $newsletterRow) {
 
             if ($newsletterRow->status != 'sending') {

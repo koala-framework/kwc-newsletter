@@ -8,6 +8,18 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Newsletter extends Command
 {
+    /**
+     * @var \Kwf_Model_Abstract
+     */
+    private $newslettersModel;
+
+    public function __construct(\Kwf_Model_Abstract $model)
+    {
+        $this->newslettersModel = $model;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -32,7 +44,7 @@ class Newsletter extends Command
         \Kwf_Events_ModelObserver::getInstance()->disable();
 
         $newsletterId = $input->getOption('newsletterId');
-        $nlRow = \Kwf_Model_Abstract::getInstance('Kwc_Newsletter_Model')->getRow($newsletterId);
+        $nlRow = $this->newslettersModel->getRow($newsletterId);
 
         $mailsPerMinute = $nlRow->getCountOfMailsPerMinute();
 
@@ -51,7 +63,7 @@ class Newsletter extends Command
                 );
             }
 
-            $nlStatus = \Kwf_Model_Abstract::getInstance('Kwc_Newsletter_Model')->fetchColumnByPrimaryId('status', $nlRow->id);
+            $nlStatus = $this->newslettersModel->fetchColumnByPrimaryId('status', $nlRow->id);
             if ($nlStatus != 'sending') {
                 $output->writeln(
                     "break sending because newsletter status changed to '$nlStatus'",
