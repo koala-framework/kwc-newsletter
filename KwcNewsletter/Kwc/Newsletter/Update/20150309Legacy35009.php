@@ -3,13 +3,15 @@ class KwcNewsletter_Kwc_Newsletter_Update_20150309Legacy35009 extends Kwf_Update
 {
     public function update()
     {
+        $db = Kwf_Registry::get('db');
+
         $done = array();
-        foreach (Kwf_Model_Abstract::getInstance('KwcNewsletter_Kwc_Newsletter_Model')->getRows() as $row) {
-            if (in_array($row->component_id, $done)) continue;
-            $done[] = $row->component_id;
-            if ($this->_progressBar) $this->_progressBar->next(1, "35009: updating ".$row->component_id);
+        foreach ($db->fetchAll("SELECT component_id FROM kwc_newsletter") as $row) {
+            if (in_array($row['component_id'], $done)) continue;
+            $done[] = $row['component_id'];
+            if ($this->_progressBar) $this->_progressBar->next(1, "35009: updating ".$row['component_id']);
             $a = new Kwf_Update_Action_Component_ConvertComponentIds(array(
-                'pattern' => $row->component_id.'_%-mail%',
+                'pattern' => $row['component_id'].'_%-mail%',
                 'search' => '-mail',
                 'replace' => '_mail',
             ));

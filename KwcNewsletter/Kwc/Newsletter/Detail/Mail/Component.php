@@ -14,7 +14,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Mail_Component extends Kwc_Mail_Compon
         $select->order('id', 'ASC');
         $ret['recipientSources'] = array(
             'n' => array(
-                'model' => 'KwcNewsletter_Kwc_Newsletter_Subscribe_Model',
+                'model' => 'KwcNewsletter\Bundle\Model\Subscribers',
                 'select' => $select
             )
         );

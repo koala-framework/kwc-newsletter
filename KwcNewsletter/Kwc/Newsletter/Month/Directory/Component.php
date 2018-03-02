@@ -5,7 +5,7 @@ class KwcNewsletter_Kwc_Newsletter_Month_Directory_Component extends Kwc_Directo
     {
         $ret = parent::getSettings($param);
 
-        $ret['generators']['detail']['model'] = 'KwcNewsletter_Kwc_Newsletter_Model';
+        $ret['generators']['detail']['model'] = 'KwcNewsletter\Bundle\Model\Newsletters';
 
         //für News-Kategorien Box
         $ret['categoryChildId'] = 'month';

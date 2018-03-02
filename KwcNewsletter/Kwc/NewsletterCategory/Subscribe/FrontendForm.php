@@ -1,7 +1,7 @@
 <?php
 class KwcNewsletter_Kwc_NewsletterCategory_Subscribe_FrontendForm extends KwcNewsletter_Kwc_Newsletter_Subscribe_FrontendForm
 {
-    protected $_modelName = 'KwcNewsletter_Kwc_NewsletterCategory_Subscribe_Model';
+    protected $_modelName = 'KwcNewsletter\Bundle\Model\Subscribers';
 
     protected function _initFields()
     {
@@ -9,7 +9,7 @@ class KwcNewsletter_Kwc_NewsletterCategory_Subscribe_FrontendForm extends KwcNew
 
         $categories = $this->_getCategories();
         if (count($categories) > 1) {
-            $this->add(new Kwf_Form_Field_MultiCheckbox('ToCategory', 'Category', trlKwfStatic('Categories')))
+            $this->add(new Kwf_Form_Field_MultiCheckbox('ToCategories', 'Category', trlKwfStatic('Categories')))
                 ->setValues($categories)
                 ->setWidth(255)
                 ->setAllowBlank(false);
@@ -35,7 +35,7 @@ class KwcNewsletter_Kwc_NewsletterCategory_Subscribe_FrontendForm extends KwcNew
         if (!$this->_subscribeComponentId) {
             return array();
         }
-        $model = Kwf_Component_Model::getInstance('KwcNewsletter_Kwc_NewsletterCategory_Subscribe_CategoriesModel');
+        $model = Kwf_Component_Model::getInstance('KwcNewsletter\Bundle\Model\SubscribeCategories');
         $select = $model->select()
             ->whereEquals('component_id', $this->_subscribeComponentId)
             ->order('pos');
@@ -50,7 +50,7 @@ class KwcNewsletter_Kwc_NewsletterCategory_Subscribe_FrontendForm extends KwcNew
     {
         $categories = $this->_getCategories();
         if (count($categories) == 1) {
-            $model = Kwf_Model_Abstract::getInstance('KwcNewsletter_Kwc_NewsletterCategory_Subscribe_SubscriberToCategory');
+            $model = Kwf_Model_Abstract::getInstance('KwcNewsletter\Bundle\Model\SubscribersToCategories');
             $row = $model->createRow(array(
                 'subscriber_id' => $row->id,
                 'category_id' => key($categories)

@@ -1,14 +1,20 @@
 <?php
-class KwcNewsletter_Kwc_Newsletter_QueueModel extends Kwf_Model_Db_Proxy
+namespace KwcNewsletter\Bundle\Model;
+
+class NewsletterQueues extends \Kwf_Model_Db_Proxy
 {
-    protected $_table = 'kwc_newsletter_queue';
-    protected $_rowClass = 'KwcNewsletter_Kwc_Newsletter_QueueRow';
-    protected $_referenceMap = array(
-        'Newsletter' => array(
+    protected $_table = 'kwc_newsletter_queues';
+    protected $_rowClass = 'KwcNewsletter\Bundle\Model\Row\NewsletterQueues';
+
+    protected function _init()
+    {
+        $this->_referenceMap['Newsletter'] = array(
             'column' => 'newsletter_id',
-            'refModelClass' => 'KwcNewsletter_Kwc_Newsletter_Model'
-        )
-    );
+            'refModelClass' => 'KwcNewsletter\Bundle\Model\Newsletters'
+        );
+
+        parent::_init();
+    }
 
     public function deleteRows($where)
     {

@@ -1,5 +1,7 @@
 <?php
-class KwcNewsletter_Kwc_Newsletter_Subscribe_LogsModel extends Kwf_Model_Db
+namespace KwcNewsletter\Bundle\Model;
+
+class SubscriberLogs extends \Kwf_Model_Db
 {
     protected $_table = 'kwc_newsletter_subscriber_logs';
 
@@ -7,8 +9,9 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_LogsModel extends Kwf_Model_Db
     {
         $this->_referenceMap['Subscriber'] = array(
             'column' => 'subscriber_id',
-            'refModelClass' => 'KwcNewsletter_Kwc_Newsletter_Subscribe_Model'
+            'refModelClass' => 'KwcNewsletter\Bundle\Model\Subscribers'
         );
+
         parent::_init();
     }
 }

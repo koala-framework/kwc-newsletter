@@ -5,7 +5,7 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Mail_Component extends Kwc_Mail_Abs
     {
         $ret = parent::getSettings($param);
         $ret['recipientSources'] = array(
-            'sub' => 'KwcNewsletter_Kwc_Newsletter_Subscribe_Model'
+            'sub' => 'KwcNewsletter\Bundle\Model\Subscribers'
         );
         $ret['viewCache'] = false;
 

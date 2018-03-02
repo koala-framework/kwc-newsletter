@@ -42,7 +42,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Component extends Kwc_Directories_Item
 
     public function countQueue()
     {
-        $model = $this->getData()->parent->getComponent()->getChildModel()->getDependentModel('Queue');
+        $model = $this->getData()->parent->getComponent()->getChildModel()->getDependentModel('Queues');
         $select = $model->select()->whereEquals('newsletter_id', $this->getData()->row->id);
         return $model->countRows($select);
     }
@@ -52,7 +52,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Component extends Kwc_Directories_Item
         $ret = array();
 
         $newsletter = $this->getData()->row;
-        $queueModel = $this->getData()->parent->getComponent()->getChildModel()->getDependentModel('Queue');
+        $queueModel = $this->getData()->parent->getComponent()->getChildModel()->getDependentModel('Queues');
         $select = $queueModel->select()
             ->whereEquals('recipient_model', $model)
             ->whereEquals('recipient_id', $ids)
@@ -117,7 +117,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Component extends Kwc_Directories_Item
         }
 
         // add to model
-        $queueModel = $this->getData()->parent->getComponent()->getChildModel()->getDependentModel('Queue');
+        $queueModel = $this->getData()->parent->getComponent()->getChildModel()->getDependentModel('Queues');
         $queueModel->import(Kwf_Model_Db::FORMAT_ARRAY, $import, array('ignore' => true));
         return $ret;
     }

@@ -13,7 +13,7 @@ class KwcNewsletter_Kwc_NewsletterCategory_Subscribe_Component extends KwcNewsle
     public function insertSubscriptionWithCategory(Kwf_Model_Row_Abstract $row, $categoryId)
     {
         $exists = $this->_subscriptionExists($row);
-        $nl2cat = Kwf_Model_Abstract::getInstance('KwcNewsletter_Kwc_NewsletterCategory_Subscribe_SubscriberToCategory');
+        $nl2cat = Kwf_Model_Abstract::getInstance('KwcNewsletter\Bundle\Model\SubscribersToCategories');
         if ($exists) {
             //already subscribed
             $s = new Kwf_Model_Select();
@@ -88,7 +88,7 @@ class KwcNewsletter_Kwc_NewsletterCategory_Subscribe_Component extends KwcNewsle
                 $categories = $this->getForm()->getCategories();
                 if (count($categories) == 1) {
                     $catKeys = array_keys($categories);
-                    $toModel = Kwf_Model_Abstract::getInstance('KwcNewsletter_Kwc_NewsletterCategory_Subscribe_SubscriberToCategory');
+                    $toModel = Kwf_Model_Abstract::getInstance('KwcNewsletter\Bundle\Model\SubscribersToCategories');
                     $toRow = $toModel->getRow($toModel->select()
                         ->whereEquals('subscriber_id', $exists->id)
                         ->whereEquals('category_id', $catKeys[0])

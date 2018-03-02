@@ -89,7 +89,7 @@ class StartJob extends AbstractJob
             $s = new \Kwf_Model_Select();
             $s->whereEquals('newsletter_id', $newsletterRow->id);
             $s->whereNull('send_process_pid');
-            if (!$newsletterRow->getModel()->getDependentModel('Queue')->countRows($s)) {
+            if (!$newsletterRow->getModel()->getDependentModel('Queues')->countRows($s)) {
                 $newsletterRow->status = 'finished';
                 $newsletterRow->save();
                 $logger->debug("Newsletter finished.");
@@ -100,8 +100,8 @@ class StartJob extends AbstractJob
                 //delete "hanging" queue entries
                 $s = new \Kwf_Model_Select();
                 $s->whereEquals('newsletter_id', $newsletterRow->id);
-                foreach ($newsletterRow->getModel()->getDependentModel('Queue')->getRows($s) as $queueRow) {
-                    $newsletterRow->getModel()->getDependentModel('QueueLog')->createRow(array(
+                foreach ($newsletterRow->getModel()->getDependentModel('Queues')->getRows($s) as $queueRow) {
+                    $newsletterRow->getModel()->getDependentModel('QueueLogs')->createRow(array(
                         'newsletter_id' => $queueRow->newsletter_id,
                         'recipient_model' => $queueRow->recipient_model,
                         'recipient_id' => $queueRow->recipient_id,

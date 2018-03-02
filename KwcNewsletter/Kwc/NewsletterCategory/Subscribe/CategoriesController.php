@@ -1,7 +1,7 @@
 <?php
 class KwcNewsletter_Kwc_NewsletterCategory_Subscribe_CategoriesController extends Kwf_Controller_Action_Auto_Kwc_Grid
 {
-    protected $_modelName = 'KwcNewsletter_Kwc_NewsletterCategory_Subscribe_CategoriesModel';
+    protected $_modelName = 'KwcNewsletter\Bundle\Model\SubscribeCategories';
     protected $_position = 'pos';
 
     protected function _initColumns()
@@ -12,7 +12,7 @@ class KwcNewsletter_Kwc_NewsletterCategory_Subscribe_CategoriesController extend
             ->getComponentByClass('KwcNewsletter_Kwc_Newsletter_Component', array('subroot'=>$c));
 
         $values = array();
-        $model = Kwf_Model_Abstract::getInstance('KwcNewsletter_Kwc_NewsletterCategory_CategoriesModel');
+        $model = Kwf_Model_Abstract::getInstance('KwcNewsletter\Bundle\Model\Categories');
         $s = $model->select()
             ->whereEquals('newsletter_component_id', $nl->dbId)
             ->order('pos');

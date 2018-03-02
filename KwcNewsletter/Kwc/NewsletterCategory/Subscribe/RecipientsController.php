@@ -1,7 +1,7 @@
 <?php
 class KwcNewsletter_Kwc_NewsletterCategory_Subscribe_RecipientsController extends KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController
 {
-    protected $_model = 'KwcNewsletter_Kwc_NewsletterCategory_Subscribe_Model';
+    protected $_model = 'KwcNewsletter\Bundle\Model\Subscribers';
     protected function _initColumns()
     {
         parent::_initColumns();
@@ -13,7 +13,7 @@ class KwcNewsletter_Kwc_NewsletterCategory_Subscribe_RecipientsController extend
                 ->getComponentByDbId($this->_getParam('componentId'), array('ignoreVisible'=>true, 'limit'=>1))
                 ->parent->dbId;
         }
-        $model = Kwf_Model_Abstract::getInstance('KwcNewsletter_Kwc_NewsletterCategory_CategoriesModel');
+        $model = Kwf_Model_Abstract::getInstance('KwcNewsletter\Bundle\Model\Categories');
         $s = $model->select()
             ->whereEquals('newsletter_component_id', $newsletterComponentId)
             ->order('pos');
@@ -48,7 +48,7 @@ class KwcNewsletter_Kwc_NewsletterCategory_Subscribe_RecipientsController extend
         if ($this->_getParam('query_category_id') && $this->_getParam('query_category_id') != 'all') {
             $childSelect = new Kwf_Model_Select();
             $childSelect->whereEquals('category_id', $this->_getParam('query_category_id'));
-            $select->where(new Kwf_Model_Select_Expr_Child_Contains('ToCategory', $childSelect));
+            $select->where(new Kwf_Model_Select_Expr_Child_Contains('ToCategories', $childSelect));
         }
         return $select;
     }

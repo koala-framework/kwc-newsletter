@@ -1,6 +1,8 @@
 <?php
-class KwcNewsletter_Kwc_Newsletter_Subscribe_Row extends Kwf_Model_Db_Row
-    implements Kwc_Mail_Recipient_TitleInterface, Kwc_Mail_Recipient_UnsubscribableInterface
+namespace KwcNewsletter\Bundle\Model\Row;
+
+class Subscribers extends \Kwf_Model_Db_Row
+    implements \Kwc_Mail_Recipient_TitleInterface, \Kwc_Mail_Recipient_UnsubscribableInterface
 {
     private $_logSource;
     private $_logIp;
@@ -22,13 +24,13 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Row extends Kwf_Model_Db_Row
 
     public function getMailFormat()
     {
-        return Kwc_Mail_Recipient_Interface::MAIL_FORMAT_HTML;
+        return \Kwc_Mail_Recipient_Interface::MAIL_FORMAT_HTML;
     }
 
     public function getMailGender()
     {
-        if ($this->gender == 'male') return Kwc_Mail_Recipient_GenderInterface::MAIL_GENDER_MALE;
-        if ($this->gender == 'female') return Kwc_Mail_Recipient_GenderInterface::MAIL_GENDER_FEMALE;
+        if ($this->gender == 'male') return \Kwc_Mail_Recipient_GenderInterface::MAIL_GENDER_MALE;
+        if ($this->gender == 'female') return \Kwc_Mail_Recipient_GenderInterface::MAIL_GENDER_FEMALE;
         return null;
     }
 

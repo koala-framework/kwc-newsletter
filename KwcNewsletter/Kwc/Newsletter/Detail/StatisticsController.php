@@ -32,7 +32,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_StatisticsController extends Kwf_Contr
 
         $ret = array();
         $newsletterId = $this->_getNewsletterId();
-        $total = $db->fetchOne("SELECT count_sent FROM kwc_newsletter WHERE id=$newsletterId");
+        $total = $db->fetchOne("SELECT count_sent FROM kwc_newsletters WHERE id=$newsletterId");
 
         if (!$total) { return array(); }
 

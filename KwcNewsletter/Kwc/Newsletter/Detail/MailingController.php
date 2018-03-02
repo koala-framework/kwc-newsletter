@@ -4,7 +4,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_MailingController extends Kwf_Controll
     protected $_buttons = array('delete', 'deleteAll');
     protected $_defaultOrder = 'id';
     protected $_paging = 20;
-    protected $_modelName = 'KwcNewsletter_Kwc_Newsletter_QueueModel';
+    protected $_modelName = 'KwcNewsletter\Bundle\Model\NewsletterQueues';
     protected $_queryFields = array('searchtext');
     protected $_sortable = false;
     private $_newsletterRow;
