@@ -17,12 +17,14 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_DoubleOptIn_Component extends Kwc_F
         }
         $recipient = Kwc_Mail_Redirect_Component::parseRecipientParam($postData['recipient']);
 
-        $recipient->unsubscribed = 0;
-        $recipient->activated = 1;
+        if (!$recipient->activated) {
+            $recipient->unsubscribed = 0;
+            $recipient->activated = 1;
 
-        $recipient->setLogSource($this->getData()->getAbsoluteUrl());
-        $recipient->writeLog($this->getData()->trlKwf('Activated'), 'activated');
+            $recipient->setLogSource($this->getData()->getAbsoluteUrl());
+            $recipient->writeLog($this->getData()->trlKwf('Activated'), 'activated');
 
-        $recipient->save();
+            $recipient->save();
+        }
     }
 }
