@@ -50,6 +50,21 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNew
             'width' => 85
         );
 
+        $categories = $this->_getCategories();
+
+        $categorySelects = array(array('all', '- '.trlKwf('All').' -'));
+        foreach ($categories as $row) {
+            $categorySelects[] = array($row->id, $row->category);
+        }
+        $this->_filters['category_id'] = array(
+            'type'=>'ComboBox',
+            'label' => trlKwf('Categorie').':',
+            'width'=>110,
+            'skipWhere' => true,
+            'data' => $categorySelects,
+            'default' => 'all'
+        );
+
         $this->_columns->add(new Kwf_Grid_Column_Button('edit', trlKwf('Edit')));
         $this->_columns->add(new Kwf_Grid_Column('email', trlKwf('Email'), 200));
         if ($this->_model->hasColumn('gender')) {
@@ -71,6 +86,11 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNew
         foreach (Kwf_Component_Data_Root::getInstance()->getPlugins('KwcNewsletter_Kwc_Newsletter_PluginInterface') as $plugin) {
             $plugin->modifyRecipientsGridColumns($this->_columns, KwcNewsletter_Kwc_Newsletter_PluginInterface::RECIPIENTS_GRID_TYPE_EDIT_SUBSCRIBERS);
         }
+
+        foreach ($categories as $c) {
+            $this->_columns->add(new Kwf_Grid_Column_Checkbox('categorycheck'.$c->id, $c->category, 70))
+                ->setData(new KwcNewsletter_Kwc_Newsletter_Detail_RecipientCategoryData($c->id));
+        }
     }
 
     protected function _getSelect()
@@ -86,6 +106,11 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNew
                 $c = Kwf_Component_Data_Root::getInstance()->getComponentByDbId($this->_getParam('componentId'), array('ignoreVisible'=>true, 'limit'=>1));
                 $ret->whereEquals('newsletter_component_id', $c->parent->dbId);
             }
+        }
+        if ($this->_getParam('query_category_id') && $this->_getParam('query_category_id') != 'all') {
+            $childSelect = new Kwf_Model_Select();
+            $childSelect->whereEquals('category_id', $this->_getParam('query_category_id'));
+            $ret->where(new Kwf_Model_Select_Expr_Child_Contains('ToCategories', $childSelect));
         }
         return $ret;
     }
@@ -104,5 +129,21 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNew
 
             $row->save();
         }
+    }
+
+    protected function _getCategories()
+    {
+        if ($this->_getParam('newsletterComponentId')) {
+            $newsletterComponentId = $this->_getParam('newsletterComponentId');
+        } else {
+            $newsletterComponentId = Kwf_Component_Data_Root::getInstance()
+                ->getComponentByDbId($this->_getParam('componentId'), array('ignoreVisible'=>true, 'limit'=>1))
+                ->parent->dbId;
+        }
+        $model = Kwf_Model_Abstract::getInstance('KwcNewsletter\Bundle\Model\Categories');
+        $s = $model->select()
+            ->whereEquals('newsletter_component_id', $newsletterComponentId)
+            ->order('pos');
+        return $model->getRows($s);
     }
 }

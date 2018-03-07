@@ -1,5 +1,5 @@
 <?php
-class KwcNewsletter_Kwc_NewsletterCategory_Detail_RecipientCategoryData extends Kwf_Data_Abstract
+class KwcNewsletter_Kwc_Newsletter_Detail_RecipientCategoryData extends Kwf_Data_Abstract
 {
     protected $_categoryId;
 

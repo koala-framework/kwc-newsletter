@@ -50,4 +50,35 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_FrontendForm extends Kwf_Form
             ->setAllowBlank(false);
         $this->_addEmailValidator();
     }
+
+    protected function _afterSave(Kwf_Model_Row_Interface $row)
+    {
+        parent::_afterSave($row);
+
+        $this->saveCategories($row);
+    }
+
+    public function getCategories()
+    {
+        return $this->_getCategories();
+    }
+
+    protected function _getCategories()
+    {
+        return array();
+    }
+
+    public function saveCategories(Kwf_Model_Row_Interface $row)
+    {
+        foreach ($this->_getCategories() as $id => $name) {
+            $select = new Kwf_Model_Select();
+            $select->whereEquals('category_id', $id);
+            if (!$row->countChildRows('ToCategories', $select)) {
+                $childRow = $row->createChildRow('ToCategories', array(
+                   'category_id' => $id
+                ));
+                $childRow->save();
+            }
+        }
+    }
 }

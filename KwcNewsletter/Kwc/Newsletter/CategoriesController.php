@@ -1,5 +1,5 @@
 <?php
-class KwcNewsletter_Kwc_NewsletterCategory_CategoriesController extends Kwf_Controller_Action_Auto_Grid
+class KwcNewsletter_Kwc_Newsletter_CategoriesController extends Kwf_Controller_Action_Auto_Grid
 {
     protected $_modelName = 'KwcNewsletter\Bundle\Model\Categories';
     protected $_position = 'pos';

@@ -26,6 +26,7 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Component extends Kwc_Form_Componen
         $ret['from'] = ''; // would be good if overwritten
 
         $ret['menuConfig'] = 'KwcNewsletter_Kwc_Newsletter_Subscribe_MenuConfig';
+        $ret['extConfig'] = 'KwcNewsletter_Kwc_Newsletter_Subscribe_ExtConfig';
 
         $ret['assetsAdmin']['dep'][] = 'KwfAutoGrid';
         $ret['assetsAdmin']['dep'][] = 'KwfProxyPanel';
