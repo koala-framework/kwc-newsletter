@@ -1,5 +1,5 @@
 <?php
-class KwcNewsletter_Kwc_NewsletterCategory_Subscribe_ExtConfig extends Kwf_Component_Abstract_ExtConfig_Abstract
+class KwcNewsletter_Kwc_Newsletter_Subscribe_ExtConfig extends Kwf_Component_Abstract_ExtConfig_Abstract
 {
     protected function _getConfig()
     {

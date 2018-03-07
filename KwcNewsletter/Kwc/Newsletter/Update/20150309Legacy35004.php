@@ -16,6 +16,19 @@ class KwcNewsletter_Kwc_Newsletter_Update_20150309Legacy35004 extends Kwf_Update
                 $this->_afterUpdateRequired = true;
             }
         }
+
+        if (!$db->query("SHOW COLUMNS FROM `kwc_newsletter_categories` LIKE 'newsletter_component_id'")->fetchColumn()) {
+            $db->query("ALTER TABLE  `kwc_newsletter_categories` ADD  `newsletter_component_id` VARCHAR( 200 ) NOT NULL AFTER  `id`");
+            $db->query("ALTER TABLE  `kwc_newsletter_categories` ADD INDEX (  `newsletter_component_id` )");
+            if ($db->query("SELECT COUNT(*) FROM `kwc_newsletter_categories`")->fetchColumn()) {
+                $nlCId = $db->query("SELECT component_id FROM `kwc_newsletter` LIMIT 1")->fetchColumn();
+                if ($nlCId) {
+                    $db->query("UPDATE `kwc_newsletter_categories` SET newsletter_component_id='$nlCId'");
+                } else {
+                    $this->_afterUpdateRequired = true;
+                }
+            }
+        }
     }
 
     public function postUpdate()
@@ -25,6 +38,9 @@ class KwcNewsletter_Kwc_Newsletter_Update_20150309Legacy35004 extends Kwf_Update
                 ->getComponentByClass('KwcNewsletter_Kwc_Newsletter_Component', array('limit'=>1));
             Kwf_Registry::get('db')
                 ->query("UPDATE `kwc_newsletter_subscribers` SET newsletter_component_id='$c->dbId'");
+
+            Kwf_Registry::get('db')
+                ->query("UPDATE `kwc_newsletter_categories` SET newsletter_component_id='$c->dbId'");
         }
     }
 }

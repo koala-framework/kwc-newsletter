@@ -1,5 +1,5 @@
 <?php
-class KwcNewsletter_Kwc_NewsletterCategory_Update_20150309Legacy35001 extends Kwf_Update
+class KwcNewsletter_Kwc_Newsletter_Update_20150309Legacy35001 extends Kwf_Update
 {
     public function update()
     {
