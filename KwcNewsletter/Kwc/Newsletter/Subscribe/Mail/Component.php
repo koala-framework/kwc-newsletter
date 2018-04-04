@@ -8,7 +8,6 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Mail_Component extends Kwc_Mail_Abs
             'sub' => 'KwcNewsletter\Bundle\Model\Subscribers'
         );
         $ret['viewCache'] = false;
-
         return $ret;
     }
 
@@ -16,6 +15,9 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Mail_Component extends Kwc_Mail_Abs
     {
         $ret = parent::getTemplateVars($renderer);
         $ret = array_merge($ret, $this->getMailData());
+        $ret['recipientName'] = trim($ret['formRow']->getMailFirstname() . ' ' . $ret['formRow']->getMailLastname());
+        $ret['doubleOptInUrl'] = $ret['doubleOptInComponent']->getAbsoluteUrl();
+        $ret['settingsUrl'] = $ret['editComponent']->getAbsoluteUrl();
         return $ret;
     }
 
