@@ -1,0 +1,4 @@
+services:
+    kwc_newsletter.controller.subscribers_api:
+        class: KwcNewsletter\Bundle\Controller\SubscribersApiController
+        arguments: [@kwc_newsletter.model.subscribers, "%kwc_newsletter.subscribers.require_country_param_for_api%"]

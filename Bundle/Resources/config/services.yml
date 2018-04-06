@@ -3,6 +3,7 @@ imports:
     - { resource: services/maintenance_job.yml }
     - { resource: services/model.yml }
     - { resource: services/importer.yml }
+    - { resource: services/controller.yml }
 
 services:
 

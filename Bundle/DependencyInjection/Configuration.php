@@ -22,6 +22,9 @@ class Configuration implements ConfigurationInterface
                         ->integerNode('delete_unsubscribed_after_days')
                             ->defaultValue(365)
                         ->end()
+                        ->booleanNode('require_country_param_for_api')
+                            ->defaultValue(false)
+                        ->end()
                     ->end()
                 ->end() //subscribers
             ->end();
