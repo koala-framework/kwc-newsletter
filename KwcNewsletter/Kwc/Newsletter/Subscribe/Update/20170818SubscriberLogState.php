@@ -1,4 +1,3 @@
-
 <?php
 class KwcNewsletter_Kwc_Newsletter_Subscribe_Update_20170818SubscriberLogState extends Kwf_Update
 {
