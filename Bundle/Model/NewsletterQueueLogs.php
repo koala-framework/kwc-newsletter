@@ -4,6 +4,7 @@ namespace KwcNewsletter\Bundle\Model;
 class NewsletterQueueLogs extends \Kwf_Model_Db_Proxy
 {
     protected $_table = 'kwc_newsletter_queue_logs';
+    protected $_rowClass = 'KwcNewsletter\Bundle\Model\Row\NewsletterQueueLogs';
 
     protected function _init()
     {
