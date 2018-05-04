@@ -6,6 +6,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_QueueLogsController extends Kwf_Contro
     protected $_defaultOrder = 'id';
     protected $_paging = 20;
     protected $_model = 'KwcNewsletter\Bundle\Model\NewsletterQueueLogs';
+    private $_newsletterRow;
 
     protected function _initColumns()
     {
@@ -31,5 +32,23 @@ class KwcNewsletter_Kwc_Newsletter_Detail_QueueLogsController extends Kwf_Contro
             ->setData(new KwcNewsletter_Kwc_Newsletter_Detail_UserData('lastname'));
         $this->_columns->add(new Kwf_Grid_Column('status', trlKwf('Status'), 140))
             ->setData(new KwcNewsletter_Kwc_Newsletter_Detail_QueueLogStatus());
+    }
+
+    protected function _getSelect()
+    {
+        $select = parent::_getSelect();
+        $select->whereEquals('newsletter_id', $this->_getNewsletterRow()->id);
+        return $select;
+    }
+
+    private function _getNewsletterRow()
+    {
+        if (!$this->_newsletterRow) {
+            $component = Kwf_Component_Data_Root::getInstance()->getComponentByDbId(
+                $this->_getParam('componentId')
+            );
+            $this->_newsletterRow = $component->row;
+        }
+        return $this->_newsletterRow;
     }
 }
