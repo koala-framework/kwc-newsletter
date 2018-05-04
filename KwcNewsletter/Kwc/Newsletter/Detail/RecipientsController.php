@@ -6,6 +6,13 @@ class KwcNewsletter_Kwc_Newsletter_Detail_RecipientsController extends KwcNewsle
     protected function _initColumns()
     {
         parent::_initColumns();
+
+        $this->_filters['last_activated_date'] = array(
+            'type' => 'Date',
+            'label' => trlKwf('Activation date before') . ':',
+            'skipWhere' => true
+        );
+
         unset($this->_columns['edit']);
     }
 
@@ -24,6 +31,11 @@ class KwcNewsletter_Kwc_Newsletter_Detail_RecipientsController extends KwcNewsle
                 $ret->merge($rs[$key]['select']);
             }
         }
+
+        if ($lastActivatedDate = $this->_getParam('query_last_activated_date')) {
+            $ret->where(new Kwf_Model_Select_Expr_LowerEqual('last_activated_date', new Kwf_Date($lastActivatedDate)));
+        }
+
         return $ret;
     }
 
