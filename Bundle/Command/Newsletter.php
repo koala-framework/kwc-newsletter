@@ -122,7 +122,7 @@ class Newsletter extends Command
 
                 $queueLogModel->createRow(array(
                     'newsletter_id' => $row->newsletter_id,
-                    'recipient_model' => $row->recipient_model,
+                    'recipient_model_shortcut' => $row->recipient_model_shortcut,
                     'recipient_id' => $row->recipient_id,
                     'status' => $status,
                     'send_date' => date('Y-m-d H:i:s')

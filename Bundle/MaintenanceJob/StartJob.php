@@ -103,7 +103,7 @@ class StartJob extends AbstractJob
                 foreach ($newsletterRow->getModel()->getDependentModel('Queues')->getRows($s) as $queueRow) {
                     $newsletterRow->getModel()->getDependentModel('QueueLogs')->createRow(array(
                         'newsletter_id' => $queueRow->newsletter_id,
-                        'recipient_model' => $queueRow->recipient_model,
+                        'recipient_model_shortcut' => $queueRow->recipient_model_shortcut,
                         'recipient_id' => $queueRow->recipient_id,
                         'status' => 'failed',
                         'send_date' => date('Y-m-d H:i:s')
