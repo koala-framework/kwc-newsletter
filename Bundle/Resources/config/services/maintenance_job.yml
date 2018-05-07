@@ -7,12 +7,12 @@ services:
 
     kwc_newsletter.maintenance_job.delete_unsubscribed:
             class: KwcNewsletter\Bundle\MaintenanceJob\DeleteUnsubscribedJob
-            arguments: [@kwc_newsletter.model.subscribers]
+            arguments: [@kwc_newsletter.model.subscribers, "%kwc_newsletter.subscribers.delete_unsubscribed_after_days%"]
             tags:
                 - { name: 'kwf.maintenance_job' }
 
     kwc_newsletter.maintenance_job.delete_not_activated:
             class: KwcNewsletter\Bundle\MaintenanceJob\DeleteNotActivatedJob
-            arguments: [@kwc_newsletter.model.subscribers]
+            arguments: [@kwc_newsletter.model.subscribers, "%kwc_newsletter.subscribers.delete_not_activated_after_days%"]
             tags:
                 - { name: 'kwf.maintenance_job' }
