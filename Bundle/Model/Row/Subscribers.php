@@ -89,4 +89,28 @@ class Subscribers extends \Kwf_Model_Db_Row
         ));
         if ($saveImmediatly) $childRow->save();
     }
+
+    protected function _beforeDelete()
+    {
+        parent::_beforeDelete();
+
+        $select = new \Kwf_Model_Select();
+        $select->whereEquals('subscriber_id', $this->id);
+        $this->getModel()->getDependentModel('Logs')->deleteRows($select);
+        $this->getModel()->getDependentModel('ToCategories')->deleteRows($select);
+    }
+
+    public function deleteAndHash()
+    {
+        $model = \Kwf_Model_Abstract::getInstance('KwcNewsletter\Bundle\Model\DeletedSubscriberHashes');
+
+        $hash = sha1($this->email);
+        $select = new \Kwf_Model_Select();
+        $select->whereId($hash);
+        if (!$model->countRows($select)) {
+            $model->createRow(array('id' => $hash))->save();
+        }
+
+        $this->delete();
+    }
 }

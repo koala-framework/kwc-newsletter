@@ -1,7 +1,7 @@
 <?php
 class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNewsletter_Kwc_Newsletter_Subscribe_AbstractRecipientsController
 {
-    protected $_buttons = array('add', 'unsubscribe', 'xls');
+    protected $_buttons = array('add', 'unsubscribe', 'delete', 'xls');
     protected $_sortable = true;
     protected $_defaultOrder = 'id';
     protected $_paging = 20;
@@ -145,5 +145,10 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNew
             ->whereEquals('newsletter_component_id', $newsletterComponentId)
             ->order('pos');
         return $model->getRows($s);
+    }
+
+    protected function _deleteRow(Kwf_Model_Row_Interface $row)
+    {
+        $row->deleteAndHash();
     }
 }

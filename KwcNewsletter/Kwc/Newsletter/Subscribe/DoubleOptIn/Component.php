@@ -23,8 +23,16 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_DoubleOptIn_Component extends Kwc_F
 
             $recipient->setLogSource($this->getData()->getAbsoluteUrl());
             $recipient->writeLog($this->getData()->trlKwf('Activated'), 'activated');
-
             $recipient->save();
+
+            $this->_deleteEmailHash(sha1($recipient->email));
         }
+    }
+
+    protected function _deleteEmailHash($hash)
+    {
+        $select = new Kwf_Model_Select();
+        $select->whereId($hash);
+        Kwf_Model_Abstract::getInstance('KwcNewsletter\Bundle\Model\DeletedSubscriberHashes')->deleteRows($select);
     }
 }
