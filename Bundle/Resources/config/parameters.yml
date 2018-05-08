@@ -1,0 +1,2 @@
+parameters:
+    importer.subscriber.class: "KwcNewsletter\Bundle\Importer\Subscriber"
