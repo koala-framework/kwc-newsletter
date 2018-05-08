@@ -49,6 +49,19 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNew
             'type'=>'TextField',
             'width' => 85
         );
+        $this->_filters['state'] = array(
+            'type' => 'ComboBox',
+            'label' => trlKwf('Status').':',
+            'width' => 100,
+            'listWidth' => 120,
+            'skipWhere' => true,
+            'data' => array(
+                'unsubscribed' => trlKwf('unsubscribed'),
+                'not_activated' => trlKwf('not activated'),
+                'activated' => trlKwf('active')
+            ),
+            'defaultText' => trlKwf('all')
+        );
 
         $categories = $this->_getCategories();
 
@@ -78,7 +91,7 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNew
         $this->_columns->add(new Kwf_Grid_Column('firstname', trlKwf('First name'), 110));
         $this->_columns->add(new Kwf_Grid_Column('lastname', trlKwf('Last name'), 110));
 
-        $this->_columns->add(new Kwf_Grid_Column('activated', trlKwf('Active?'), 80))
+        $this->_columns->add(new Kwf_Grid_Column('activated', trlKwf('Status'), 80))
             ->setData(new KwcNewsletter_Kwc_Newsletter_Detail_IsActiveData())
             ->setRenderer('newsletterState')
             ->setType('string');
@@ -105,6 +118,17 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNew
             } else {
                 $c = Kwf_Component_Data_Root::getInstance()->getComponentByDbId($this->_getParam('componentId'), array('ignoreVisible'=>true, 'limit'=>1));
                 $ret->whereEquals('newsletter_component_id', $c->parent->dbId);
+            }
+        }
+        if (($state = $this->_getParam('query_state')) && $state != 'all') {
+            if ($state === 'unsubscribed') {
+                $ret->whereEquals('unsubscribed', true);
+            } else if ($state === 'not_activated') {
+                $ret->whereEquals('activated', false);
+                $ret->whereEquals('unsubscribed', false);
+            } else if ($state === 'activated') {
+                $ret->whereEquals('activated', true);
+                $ret->whereEquals('unsubscribed', false);
             }
         }
         if ($this->_getParam('query_category_id') && $this->_getParam('query_category_id') != 'all') {
