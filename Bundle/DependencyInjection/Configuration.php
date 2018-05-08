@@ -14,6 +14,7 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->arrayNode('subscribers')
+                    ->addDefaultsIfNotSet()
                     ->children()
                         ->integerNode('delete_not_activated_after_days')
                             ->defaultValue(7)
