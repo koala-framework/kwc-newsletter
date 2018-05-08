@@ -69,7 +69,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_ExtConfig extends Kwf_Component_Abstra
                     )
                 ),
                 'queueLogs' => array(
-                    'xtype'                 => 'kwf.autogrid',
+                    'xtype'                 => 'kwc.newsletter.detail.queueLogs',
                     'controllerUrl'         => $this->getControllerUrl('QueueLogs'),
                     'title'                 => trlKwf('Recipients')
                 ),

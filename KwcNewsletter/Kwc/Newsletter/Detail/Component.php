@@ -26,6 +26,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Component extends Kwc_Directories_Item
         $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Detail/Recipients.css';
         $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Detail/StartNewsletterPanel.js';
         $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Detail/StartNewsletterPanel.scss';
+        $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Detail/QueueLogsPanel.js';
         $ret['assetsAdmin']['files'][] = 'ext2/src/widgets/StatusBar.js';
         $ret['assetsAdmin']['dep'][] = 'KwfFormDateTimeField';
         $ret['assetsAdmin']['dep'][] = 'KwfFormCards';

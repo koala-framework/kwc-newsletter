@@ -8,3 +8,8 @@ services:
             class:   KwcNewsletter\Bundle\Model\Subscribers
             factory: ['Kwf_Model_Abstract', getInstance]
             arguments: ['KwcNewsletter\Bundle\Model\Subscribers']
+
+    kwc_newsletter.model.newsletter_queue_logs:
+            class:   KwcNewsletter\Bundle\Model\NewsletterQueueLogs
+            factory: ['Kwf_Model_Abstract', getInstance]
+            arguments: ['KwcNewsletter\Bundle\Model\NewsletterQueueLogs']
