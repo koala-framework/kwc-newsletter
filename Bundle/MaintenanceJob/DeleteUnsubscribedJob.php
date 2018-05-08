@@ -35,20 +35,9 @@ class DeleteUnsubscribedJob extends AbstractJob
             new \Kwf_Date(strtotime("-{$this->deleteAfterDays} days"))
         ));
 
-        $ids = array_map(
-            function($subscriber) { return $subscriber['id']; },
-            $this->subscribersModel->export(\Kwf_Model_Abstract::FORMAT_ARRAY, $select, array('columns' => array('id')))
-        );
-        $count = count($ids);
-        if ($count > 0) {
-            $select = new \Kwf_Model_Select();
-            $select->whereEquals('id', $ids);
-            $this->subscribersModel->deleteRows($select);
-
-            $select = new \Kwf_Model_Select();
-            $select->whereEquals('subscriber_id', $ids);
-            $this->subscribersModel->getDependentModel('Logs')->deleteRows($select);
-            $this->subscribersModel->getDependentModel('ToCategories')->deleteRows($select);
+        $count = $this->subscribersModel->countRows($select);
+        foreach ($this->subscribersModel->getRows($select) as $row) {
+            $row->deleteAndHash();
         }
 
         $logger->debug("Deleted $count subscribers");
