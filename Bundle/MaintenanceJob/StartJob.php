@@ -2,7 +2,6 @@
 namespace KwcNewsletter\Bundle\MaintenanceJob;
 
 use KwfBundle\MaintenanceJobs\AbstractJob;
-use Symfony\Component\Process\Process;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Psr\Log\LoggerInterface;
@@ -129,17 +128,14 @@ class StartJob extends AbstractJob
                 //if ($this->_getParam('benchmark')) $cmd .= " --benchmark";
                 //if ($this->_getParam('verbose')) $cmd .= " --verbose";
 
-                $process = new Process($cmd);
-                $this->procs[$newsletterRow->id][] = $process;
-                $process->start(function ($type, $buffer) use ($logger) {
-                    if (Process::ERR === $type) {
-                        $logger->error($buffer);
-                    } else {
-                        $logger->info($buffer);
-                    }
-                });
+                $descriptorspec = array(
+                    1 => STDOUT,
+                    2 => STDERR,
+                );
+                $p = new \Kwf_Util_Proc($cmd, $descriptorspec);
+                $this->procs[$newsletterRow->id][] = $p->getPid();
 
-                $logger->debug("started new process with PID ".$process->getPid().' on '.gethostname());
+                $logger->debug("started new process with PID ".$p->getPid().' on '.gethostname());
                 $logger->debug($cmd);
 
                 sleep(3); //don't start all processes at the same time
