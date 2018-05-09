@@ -1,7 +1,7 @@
 <?php
 class KwcNewsletter_Kwc_Newsletter_Detail_QueueLogsController extends Kwf_Controller_Action_Auto_Grid
 {
-    protected $_buttons = array('xls');
+    protected $_buttons = array();
     protected $_sortable = false;
     protected $_defaultOrder = 'id';
     protected $_paging = 20;

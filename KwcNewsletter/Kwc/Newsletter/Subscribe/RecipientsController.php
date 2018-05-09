@@ -1,7 +1,7 @@
 <?php
 class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNewsletter_Kwc_Newsletter_Subscribe_AbstractRecipientsController
 {
-    protected $_buttons = array('add', 'unsubscribe', 'delete', 'xls');
+    protected $_buttons = array('add', 'unsubscribe', 'delete');
     protected $_sortable = true;
     protected $_defaultOrder = 'id';
     protected $_paging = 20;
