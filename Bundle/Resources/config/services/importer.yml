@@ -1,0 +1,19 @@
+services:
+    kwc_newsletter.importer.parser.csv:
+        class: KwcNewsletter\Bundle\Importer\Parser\Csv
+
+    kwc_newsletter.importer.excluder.invalid_email_address:
+        class: KwcNewsletter\Bundle\Importer\Excluder\InvalidEmailAddress
+
+    kwc_newsletter.importer.excluder.deleted_hashes:
+        class: KwcNewsletter\Bundle\Importer\Excluder\DeletedHashes
+        arguments: [@kwc_newsletter.model.deleted_subscriber_hashes]
+
+    kwc_newsletter.importer.excluder.manager:
+        class: KwcNewsletter\Bundle\Importer\Excluder\Manager
+        arguments:
+            - [@kwc_newsletter.importer.excluder.invalid_email_address, @kwc_newsletter.importer.excluder.deleted_hashes]
+
+    kwc_newsletter.importer.subscriber_factory:
+        class: KwcNewsletter\Bundle\Importer\SubscriberFactory
+        arguments: [@kwc_newsletter.model.subscribers, "%importer.subscriber.class%"]

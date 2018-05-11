@@ -13,3 +13,8 @@ services:
             class:   KwcNewsletter\Bundle\Model\NewsletterQueueLogs
             factory: ['Kwf_Model_Abstract', getInstance]
             arguments: ['KwcNewsletter\Bundle\Model\NewsletterQueueLogs']
+
+    kwc_newsletter.model.deleted_subscriber_hashes:
+            class:   KwcNewsletter\Bundle\Model\DeletedSubscriberHashes
+            factory: ['Kwf_Model_Abstract', getInstance]
+            arguments: ['KwcNewsletter\Bundle\Model\DeletedSubscriberHashes']
