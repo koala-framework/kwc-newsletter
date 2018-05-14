@@ -2,7 +2,6 @@
 namespace KwcNewsletter\Bundle\MaintenanceJob;
 
 use KwfBundle\MaintenanceJobs\AbstractJob;
-use Symfony\Component\Process\Process;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Psr\Log\LoggerInterface;
@@ -13,7 +12,6 @@ class StartJob extends AbstractJob
      * @var \Kwf_Model_Abstract
      */
     private $newslettersModel;
-    private $procs = array();
 
     public function __construct(\Kwf_Model_Abstract $model)
     {
@@ -55,6 +53,18 @@ class StartJob extends AbstractJob
             }
         }
 
+        $procs = array();
+        foreach (\Kwf_Util_Process::getRunningWebProcesses() as $process) {
+            if ($process['cmd'] !== 'symfony kwc_newsletter:send') continue;
+
+            if (preg_match("#--newsletterId=([0-9]+)#", $process['args'], $matches)) {
+                $newsletterId = $matches[1];
+                if (!array_key_exists($newsletterId, $procs)) $procs[$newsletterId] = array();
+
+                $procs[$newsletterId][] = $process['pid'];
+            }
+        }
+
         $select = $this->newslettersModel->select()
             ->where(new \Kwf_Model_Select_Expr_Or(array(
                 new \Kwf_Model_Select_Expr_Equal('status', 'start'),
@@ -74,16 +84,8 @@ class StartJob extends AbstractJob
                 $newsletterRow->save();
             }
 
-            if (!isset($this->procs[$newsletterRow->id])) {
-                $this->procs[$newsletterRow->id] = array();
-            }
-
-            //remove stopped processes (might stop because of memory limit or simply crash for some reason)
-            foreach ($this->procs[$newsletterRow->id] as $k=>$p) {
-                if (!$p->isRunning()) {
-                    $logger->debug("process {$p->getPid()} stopped...");
-                    unset($this->procs[$newsletterRow->id][$k]);
-                }
+            if (!isset($procs[$newsletterRow->id])) {
+                $procs[$newsletterRow->id] = array();
             }
 
             $s = new \Kwf_Model_Select();
@@ -117,29 +119,26 @@ class StartJob extends AbstractJob
                 continue;
             }
 
-            $logger->info(count($this->procs[$newsletterRow->id])." running processes");
+            $logger->info(count($procs[$newsletterRow->id])." running processes");
 
             $numOfProcesses = 1;
             if ($newsletterRow->mails_per_minute == 'unlimited') {
                 $numOfProcesses = 3;
             }
-            while (count($this->procs[$newsletterRow->id]) < $numOfProcesses) {
+            while (count($procs[$newsletterRow->id]) < $numOfProcesses) {
                 $cmd = "php bootstrap.php symfony kwc_newsletter:send --newsletterId=$newsletterRow->id";
                 if ($debug) $cmd .= " -v";
                 //if ($this->_getParam('benchmark')) $cmd .= " --benchmark";
                 //if ($this->_getParam('verbose')) $cmd .= " --verbose";
 
-                $process = new Process($cmd);
-                $this->procs[$newsletterRow->id][] = $process;
-                $process->start(function ($type, $buffer) use ($logger) {
-                    if (Process::ERR === $type) {
-                        $logger->error($buffer);
-                    } else {
-                        $logger->info($buffer);
-                    }
-                });
+                $descriptorspec = array(
+                    1 => STDOUT,
+                    2 => STDERR,
+                );
+                $p = new \Kwf_Util_Proc($cmd, $descriptorspec);
+                $procs[$newsletterRow->id][] = $p->getPid();
 
-                $logger->debug("started new process with PID ".$process->getPid().' on '.gethostname());
+                $logger->debug("started new process with PID ".$p->getPid().' on '.gethostname());
                 $logger->debug($cmd);
 
                 sleep(3); //don't start all processes at the same time
