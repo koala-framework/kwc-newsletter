@@ -18,5 +18,8 @@ class SubscribersToCategories extends \Kwf_Model_Db
         );
 
         parent::_init();
+
+        $this->_exprs['subscriber_activated'] = new \Kwf_Model_Select_Expr_Parent('Subscriber', 'activated');
+        $this->_exprs['subscriber_unsubscribed'] = new \Kwf_Model_Select_Expr_Parent('Subscriber', 'unsubscribed');
     }
 }
