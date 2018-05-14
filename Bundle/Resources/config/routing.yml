@@ -1,0 +1,3 @@
+kwc_newsletter.subscribers_api:
+    resource: "@KwcNewsletterBundle/Controller/SubscribersApiController.php"
+    type: annotation
