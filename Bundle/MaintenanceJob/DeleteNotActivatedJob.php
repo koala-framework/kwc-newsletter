@@ -30,6 +30,7 @@ class DeleteNotActivatedJob extends AbstractJob
     {
         $select = new \Kwf_Model_Select();
         $select->whereEquals('activated', false);
+        $select->whereEquals('unsubscribed', false);
         $select->where(new \Kwf_Model_Select_Expr_LowerEqual(
             new \Kwf_Model_Select_Expr_Field('last_subscribe_date'),
             new \Kwf_Date(strtotime("-{$this->deleteAfterDays} days"))
