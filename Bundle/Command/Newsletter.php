@@ -150,7 +150,7 @@ class Newsletter extends Command
                     OutputInterface::VERBOSITY_VERY_VERBOSE
                 );
 
-                if ($status == 'failed') {
+                if ($status == 'failed' && $output->isVerbose()) {
                     $output->writeln(
                         "stopping because sending failed in debug mode",
                         OutputInterface::VERBOSITY_VERBOSE
