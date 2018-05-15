@@ -1,6 +1,8 @@
 <?php
 class KwcNewsletter_Kwc_Newsletter_Detail_Mail_Component extends Kwc_Mail_Component
 {
+    private $_mailBouncePlugin;
+
     public static function getSettings($param = null)
     {
         $ret = parent::getSettings($param);
@@ -75,10 +77,14 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Mail_Component extends Kwc_Mail_Compon
     public function createMail(Kwc_Mail_Recipient_Interface $recipient, $data = null, $toAddress = null, $format = null, $addViewTracker = true)
     {
         $mail = parent::createMail($recipient, $data, $toAddress, $format, $addViewTracker);
-        foreach (Kwf_Component_Data_Root::getInstance()->getPlugins('KwcNewsletter_Kwc_Newsletter_PluginInterface') as $plugin) {
-            if (!$plugin instanceof NewsletterMailBouncePlugin_Plugin) continue;
-            $plugin->setReturnPath($mail, $this->getData()->parent->id, $recipient->id);
+
+        if (!isset($this->_mailBouncePlugin)) {
+            foreach (Kwf_Component_Data_Root::getInstance()->getPlugins('KwcNewsletter_Kwc_Newsletter_PluginInterface') as $plugin) {
+                if (!$plugin instanceof NewsletterMailBouncePlugin_Plugin) continue;
+                $this->_mailBouncePlugin = $plugin;
+            }
         }
+        $this->_mailBouncePlugin->setReturnPath($mail, $this->getData()->parent->id, $recipient->id);
         return $mail;
     }
 }
