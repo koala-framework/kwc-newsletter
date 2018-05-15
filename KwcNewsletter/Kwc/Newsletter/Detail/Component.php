@@ -55,7 +55,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Component extends Kwc_Directories_Item
         $newsletter = $this->getData()->row;
         $queueModel = $this->getData()->parent->getComponent()->getChildModel()->getDependentModel('Queues');
         $select = $queueModel->select()
-            ->whereEquals('recipient_model', $model)
+            ->whereEquals('recipient_model_shortcut', $this->_getRecipientModelShortcutFromModel($this->getData()->getChildComponent('_mail')->getComponent(), $model))
             ->whereEquals('recipient_id', $ids)
             ->whereEquals('newsletter_id', $newsletter->id);
         $queueModel->deleteRows($select);
@@ -81,7 +81,8 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Component extends Kwc_Directories_Item
             throw new Kwf_Exception('Model "' . get_class($model) . '" has to implement column mapping "Kwc_Mail_Recipient_Mapping"');
         }
 
-        $select = $this->getData()->getChildComponent('_mail')->getComponent()->getValidRecipientSelect($model, $select);
+        $mail = $this->getData()->getChildComponent('_mail')->getComponent();
+        $select = $mail->getValidRecipientSelect($model, $select);
 
         $mapping = $model->getColumnMappings('Kwc_Mail_Recipient_Mapping');
         $import = array();
@@ -96,7 +97,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Component extends Kwc_Directories_Item
             $searchText = implode(' ', $searchArray);
             $import[] = array(
                 'newsletter_id' => $newsletter->id,
-                'recipient_model' => get_class($model),
+                'recipient_model_shortcut' => $this->_getRecipientModelShortcutFromModel($mail, get_class($model)),
                 'recipient_id' => $e['id'],
                 'searchtext' =>
                     $searchText
@@ -120,6 +121,22 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Component extends Kwc_Directories_Item
         // add to model
         $queueModel = $this->getData()->parent->getComponent()->getChildModel()->getDependentModel('Queues');
         $queueModel->import(Kwf_Model_Db::FORMAT_ARRAY, $import, array('ignore' => true));
+        return $ret;
+    }
+
+    /**
+     * @param string $modelName
+     * @return null|string
+     */
+    private function _getRecipientModelShortcutFromModel(Kwc_Mail_Abstract_Component $mail, $modelName)
+    {
+        $ret = null;
+        foreach ($mail->getRecipientSources() as $shortcut => $recipientSource) {
+            if ($recipientSource['model'] === $modelName) {
+                $ret = $shortcut;
+                break;
+            }
+        }
         return $ret;
     }
 }
