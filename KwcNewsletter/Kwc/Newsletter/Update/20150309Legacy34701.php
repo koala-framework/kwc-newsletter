@@ -5,15 +5,19 @@ class KwcNewsletter_Kwc_Newsletter_Update_20150309Legacy34701 extends Kwf_Update
     {
         $db = Kwf_Registry::get('db');
 
-        //drop any indizies that might exist on email
+        //drop unique index (if exists)
+        $sql = "ALTER TABLE `kwc_newsletter_subscribers` DROP INDEX `email`";
         try {
-            $db->query("ALTER TABLE  `kwc_newsletter_subscribers` DROP INDEX  `email_2`");
-        } catch (Exception $e) {}
-        try {
-            $db->query("ALTER TABLE  `kwc_newsletter_subscribers` DROP INDEX  `email`;");
+            $db->query($sql);
         } catch (Exception $e) {}
 
-        //add proper index
-        $db->query("ALTER TABLE  `kwc_newsletter_subscribers` ADD UNIQUE `email` (`email`)");
+        //drop unique index (if exists)
+        $sql = "ALTER TABLE  `kwc_newsletter_subscribers` DROP INDEX  `email_2`";
+        try {
+            $db->query($sql);
+        } catch (Exception $e) {}
+
+        $sql = "ALTER TABLE `kwc_newsletter_subscribers` ADD INDEX `email` ( `email` )";
+        $db->query($sql);
     }
 }
