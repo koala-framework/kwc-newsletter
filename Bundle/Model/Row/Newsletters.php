@@ -37,27 +37,46 @@ class Newsletters extends \Kwf_Model_Proxy_Row
         throw new \Kwf_Exception("moved to cli controller");
     }
 
-    public function getNextQueueRow($sendProcessPid)
+    public function getNextQueueRows($sendProcessPid)
     {
         while (true) {
+            \Kwf_Model_Abstract::clearAllRows();
             $model = $this->getModel()->getDependentModel('Queues');
             $select = $model->select()
                 ->whereEquals('newsletter_id', $this->id)
                 ->whereNull('send_process_pid')
-                ->order('id')
-                ->limit(1);
-            $row = $model->getRow($select);
-            if (!$row) return null; //queue empty
+                ->order(new \Zend_Db_Expr('RAND()'))
+                ->limit(100);
+            $queueRows = $model->getRows($select);
+            if ($queueRows->count() === 0) return array(); //queue empty
+
+            $ids = array();
+            foreach ($queueRows as $row) {
+                $ids[] = $row->id;
+            }
 
             $model->getTable()->update(
                 array(
                     'send_process_pid'=>$sendProcessPid,
                 ),
-                "id={$row->id} AND ISNULL(send_process_pid)"
+                "id IN (".implode(",", $ids).") AND ISNULL(send_process_pid)"
             );
-            $pid = $model->fetchColumnByPrimaryId('send_process_pid', $row->id);
-            if ($pid == $sendProcessPid) return $row;
-            //else another process has taken our row, try again
+
+            $select = new \Kwf_Model_Select();
+            $select->whereEquals('id', $ids);
+            $sendProcessPids = array();
+            foreach ($model->export(\Kwf_Model_Abstract::FORMAT_ARRAY, $select, array('columns' => array('id', 'send_process_pid'))) as $row) {
+                $sendProcessPids[$row['id']] = $row['send_process_pid'];
+            }
+
+            $rows = array();
+            foreach ($queueRows as $row) {
+                if (!array_key_exists($row->id, $sendProcessPids) || $sendProcessPids[$row->id] != $sendProcessPid) continue;
+                $rows[] = $row;
+            }
+
+            if (!empty($rows)) return $rows;
+            //else another process has taken our rows, try again
         }
     }
 

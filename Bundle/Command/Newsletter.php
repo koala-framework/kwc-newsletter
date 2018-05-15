@@ -41,6 +41,7 @@ class Newsletter extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        \Kwf_Util_MemoryLimit::set(512);
         \Kwf_Events_ModelObserver::getInstance()->disable();
 
         $newsletterId = $input->getOption('newsletterId');
@@ -78,10 +79,10 @@ class Newsletter extends Command
             \Kwf_Benchmark::checkpoint('start');
             $userStart = microtime(true);
 
-            // Get row from queue, when empty, newsletter finished
-            $row = $nlRow->getNextQueueRow(getmypid());
-            \Kwf_Benchmark::checkpoint('get next recipient');
-            if ($row) {
+            // Get rows from queue, when empty, newsletter finished
+            $rows = $nlRow->getNextQueueRows(getmypid());
+            \Kwf_Benchmark::checkpoint('get next recipients');
+            foreach ($rows as $row) {
                 $recipient = $row->getRecipient();
                 $mc = $nlRow->getMailComponent();
                 if (!$mc->isValidRecipient($recipient)) {
@@ -155,19 +156,20 @@ class Newsletter extends Command
                         "stopping because sending failed in debug mode",
                         OutputInterface::VERBOSITY_VERBOSE
                     );
-                    break;
-                }
-
-                if (memory_get_usage() > 100*1024*1024) {
-                    $output->writeln(
-                        "stopping because of >100MB memory usage",
-                        OutputInterface::VERBOSITY_VERBOSE
-                    );
-                    break;
+                    break 2;
                 }
             }
 
-        } while ($row);
+
+            if (memory_get_usage() > 100*1024*1024) {
+                $output->writeln(
+                    "stopping because of >100MB memory usage",
+                    OutputInterface::VERBOSITY_VERBOSE
+                );
+
+                break;
+            }
+        } while (!empty($rows));
         $stop = microtime(true);
 
         // Write log
