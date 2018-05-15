@@ -78,13 +78,9 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Mail_Component extends Kwc_Mail_Compon
     {
         $mail = parent::createMail($recipient, $data, $toAddress, $format, $addViewTracker);
 
-        if (!isset($this->_mailBouncePlugin)) {
-            foreach (Kwf_Component_Data_Root::getInstance()->getPlugins('KwcNewsletter_Kwc_Newsletter_PluginInterface') as $plugin) {
-                if (!$plugin instanceof NewsletterMailBouncePlugin_Plugin) continue;
-                $this->_mailBouncePlugin = $plugin;
-            }
+        foreach (Kwf_Component_Data_Root::getInstance()->getPlugins('KwcNewsletter_Kwc_Newsletter_PluginInterface') as $plugin) {
+            $plugin->modifyReturnPath($mail, $this->getData()->parent->id, $recipient->id);
         }
-        $this->_mailBouncePlugin->setReturnPath($mail, $this->getData()->parent->id, $recipient->id);
         return $mail;
     }
 }
