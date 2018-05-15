@@ -1,8 +1,6 @@
 <?php
 class KwcNewsletter_Kwc_Newsletter_Detail_Mail_Component extends Kwc_Mail_Component
 {
-    private $_mailBouncePlugin;
-
     public static function getSettings($param = null)
     {
         $ret = parent::getSettings($param);
