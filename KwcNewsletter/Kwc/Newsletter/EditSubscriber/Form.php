@@ -1,27 +1,25 @@
 <?php
-class KwcNewsletter_Kwc_Newsletter_EditSubscriber_Form extends KwcNewsletter_Kwc_Newsletter_Subscribe_FrontendForm
+class KwcNewsletter_Kwc_Newsletter_EditSubscriber_Form extends KwcNewsletter_Kwc_Newsletter_EditSubscriber_FrontendForm
 {
-    protected function _init()
+    protected $_newsletterComponentId;
+
+    public function __construct($name = null, $newsletterComponentId)
     {
-        parent::_init();
-
-        $model = $this->_model->getDependentModel('ToCategories')->getReferencedModel('Category');
-        $s = $model->select()
-           ->whereEquals('newsletter_component_id', $this->_newsletterComponentId)
-           ->order('pos');
-       $categories = array();
-       foreach ($model->getRows($s) as $row) {
-           $categories[$row->id] = $row->category;
-       }
-
-       $this->add(new Kwf_Form_Field_MultiCheckbox('ToCategories', 'Category', trlKwf('Categories')))
-           ->setValues($categories)
-           ->setWidth(255)
-           ->setAllowBlank(false);
+        $this->_newsletterComponentId = $newsletterComponentId;
+        parent::__construct($name);
     }
 
-    protected function _afterSave(Kwf_Model_Row_Interface $row)
+    protected function _initFields()
     {
-        Kwf_Form::_afterSave($row);
+        parent::_initFields();
+
+        $select = new Kwf_Model_Select();
+        $select->whereEquals('newsletter_component_id', $this->_newsletterComponentId);
+        $select->order('pos');
+
+        $this->add(new Kwf_Form_Field_MultiCheckbox('ToCategories', 'Category', trlKwf('Categories')))
+            ->setValuesSelect($select)
+            ->setWidth(255)
+            ->setAllowBlank(false);
     }
 }

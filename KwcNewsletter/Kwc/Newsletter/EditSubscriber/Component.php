@@ -29,7 +29,7 @@ class KwcNewsletter_Kwc_Newsletter_EditSubscriber_Component extends Kwc_Form_Com
     protected function _initForm()
     {
         $formClass = Kwc_Admin::getComponentClass($this, 'FrontendForm');
-        $this->_form = new $formClass('form', $this->getData()->componentClass, null);
+        $this->_form = new $formClass('form', $this->getData()->parent->dbId);
         if ($this->_recipient) {
             $this->_form->setId($this->_recipient->id);
         }

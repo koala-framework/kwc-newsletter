@@ -33,6 +33,7 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Component extends Kwc_Form_Componen
         $ret['assetsAdmin']['files'][] = 'kwcNewsletter/KwcNewsletter/Kwc/Newsletter/Subscribe/RecipientsPanel.js';
 
         $ret['subscribeToNewsletterClass'] = 'KwcNewsletter_Kwc_Newsletter_Component';
+        $ret['subscribersModel'] = 'KwcNewsletter\Bundle\Model\Subscribers';
         return $ret;
     }
 
@@ -46,100 +47,106 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Component extends Kwc_Form_Componen
         return $nlData;
     }
 
-    public function insertSubscription(Kwf_Model_Row_Abstract $row)
+    protected function _beforeInsert(Kwf_Model_Row_Interface $fnfRow)
     {
-        $exists = $this->_subscriptionExists($row);
-        if (!$exists) {
-            $s = new Kwf_Model_Select();
-            $s->whereEquals('email', $row->email);
-            $s->whereEquals('newsletter_component_id', $this->getSubscribeToNewsletterComponent()->dbId);
-            $s->where(new Kwf_Model_Select_Expr_Or(array(
-                new Kwf_Model_Select_Expr_Equal('unsubscribed', 1),
-                new Kwf_Model_Select_Expr_Equal('activated', 0)
-            )));
-            $deleteRow = $row->getModel()->getRow($s);
-            if ($deleteRow) {
-                $deleteRow->delete();
-            }
-            $this->_allowWriteLog = false;
-            $this->_beforeInsert($row);
-            $this->_allowWriteLog = true;
-            $this->_writeLog($row);
-            $row->save();
-            $this->_afterInsert($row);
-            return true;
-        }
-        return false;
-    }
+        parent::_beforeInsert($fnfRow);
 
-    protected function _subscriptionExists(Kwf_Model_Row_Abstract $row)
-    {
-        if ($row->id) {
-            throw new Kwf_Exception("you can only insert unsaved rows");
-        }
-        $s = new Kwf_Model_Select();
-        $s->whereEquals('email', $row->email); //what if the email field is not named email?
-        $s->whereEquals('newsletter_component_id', $this->getSubscribeToNewsletterComponent()->dbId);
-        $s->where(new Kwf_Model_Select_Expr_Or(array(
-            new Kwf_Model_Select_Expr_Equal('unsubscribed', 1),
-            new Kwf_Model_Select_Expr_Equal('activated', 1)
-        )));
-
-        if ($row->getModel()->countRows($s)) {
-            //already subscribed, don't save
-            return true;
-        }
-        return false;
-    }
-
-    protected function _beforeInsert(Kwf_Model_Row_Interface $row)
-    {
-        parent::_beforeInsert($row);
-        // set unsubscribed to not send him a newsletter until he
-        // double-opted-in
-        $row->unsubscribed = 0;
-        $row->activated = 0;
-        $row->newsletter_component_id = $this->getSubscribeToNewsletterComponent()->dbId;
-
-        if ($this->_allowWriteLog) {
-            $row->setLogSource($this->getData()->getAbsoluteUrl());
-            $this->_writeLog($row);
+        $select = new Kwf_Model_Select();
+        $select->whereEquals('newsletter_component_id', $this->getSubscribeToNewsletterComponent()->dbId);
+        $select->whereEquals('email', $fnfRow->email);
+        $select->whereEquals('activated', true);
+        $select->whereEquals('unsubscribed', false);
+        if (Kwf_Model_Abstract::getInstance($this->_getSetting('subscribersModel'))->countRows($select)) {
+            throw new Kwf_Exception_Client('You are already subscribed to this newsletter.');
         }
     }
 
-    protected function _afterInsert(Kwf_Model_Row_Interface $row)
+    protected function _afterInsert(Kwf_Model_Row_Interface $fnfRow)
     {
-        parent::_afterInsert($row);
+        parent::_afterInsert($fnfRow);
 
-        if (isset($_SERVER['HTTP_HOST'])) {
-            $host = $_SERVER['HTTP_HOST'];
-        } else {
-            $host = Kwf_Registry::get('config')->server->domain;
-        }
+        $model = Kwf_Model_Abstract::getInstance($this->_getSetting('subscribersModel'));
 
-        $nlData = $this->getSubscribeToNewsletterComponent();
-        $editComponent = $nlData->getChildComponent('_editSubscriber');
-        $doubleOptInComponent = $this->getData()->getChildComponent('_doubleOptIn');
-
-        $mail = $this->getData()->getChildComponent('_mail')->getComponent();
-        $mail->send($row, array(
-            'formRow' => $row,
-            'host' => $host,
-            'editComponent' => $editComponent,
-            'doubleOptInComponent' => $doubleOptInComponent
+        $select = new Kwf_Model_Select();
+        $select->whereEquals('newsletter_component_id', $this->getSubscribeToNewsletterComponent()->dbId);
+        $select->whereEquals('email', $fnfRow->email);
+        $row = $model->getRow($select);
+        if (!$row) $row = $model->createRow(array(
+            'newsletter_component_id' => $this->getSubscribeToNewsletterComponent()->dbId,
+            'email' => $fnfRow->email
         ));
+
+        $row->gender = $fnfRow->gender;
+        $row->title = $fnfRow->title;
+        $row->firstname = $fnfRow->firstname;
+        $row->lastname = $fnfRow->lastname;
+
+        $sendActivationMail = false;
+        if (!$row->activated || $row->unsubscribed) {
+            if ($this->_allowWriteLog) {
+                $row->setLogSource($this->getData()->getAbsoluteUrl());
+                $this->_writeLog($row);
+            }
+
+            $row->unsubscribed = false;
+            $row->activated = false;
+
+            $sendActivationMail = true;
+        }
+
+        foreach ($this->_getCategories() as $id => $name) {
+            $s = new \Kwf_Model_Select();
+            $s->whereEquals('category_id', $id);
+            if (!$row->countChildRows('ToCategories', $s)) {
+                $row->createChildRow('ToCategories', array(
+                    'category_id' => $id
+                ));
+            }
+        }
+
+        if ($row->isDirty()) $row->save();
+
+        $sendOneActivationMailForEmailPerHourCacheId = 'send-one-activation-mail-for-email-per-hour-' . md5($row->email);
+        $sendOneActivationMailForEmailPerHour = \Kwf_Cache_Simple::fetch($sendOneActivationMailForEmailPerHourCacheId);
+        if (!$sendOneActivationMailForEmailPerHour && $sendActivationMail) {
+            $this->_sendActivationMail($row);
+
+            \Kwf_Cache_Simple::add($sendOneActivationMailForEmailPerHourCacheId, true, 3600);
+        }
     }
 
-    protected function _initForm()
+    protected function _getCategories()
     {
-        $formClass = Kwc_Admin::getComponentClass($this, 'FrontendForm');
-        $this->_form = new $formClass(
-            'form', $this->getData()->componentClass, $this->getData()->dbId
-        );
+        return array();
+    }
+
+    protected function _sendActivationMail(\Kwc_Mail_Recipient_Interface $row)
+    {
+        $this->getData()->getChildComponent('_mail')->getComponent()->send($row, array(
+            'formRow' => $row,
+            'host' => $this->getSubscribeToNewsletterComponent()->getDomain(),
+            'unsubscribeComponent' => null,
+            'editComponent' => $this->getSubscribeToNewsletterComponent()->getChildComponent('_editSubscriber'),
+            'doubleOptInComponent' => $this->getData()->getChildComponent('_doubleOptIn')
+        ));
     }
 
     protected function _writeLog(Kwf_Model_Row_Interface $row)
     {
         $row->writeLog($this->getData()->trlKwf('Subscribed'), 'subscribed');
+    }
+
+    /**
+     * @deprecated
+     */
+    public final function insertSubscription(Kwf_Model_Row_Abstract $row)
+    {
+    }
+
+    /**
+     * @deprecated
+     */
+    protected final function _subscriptionExists(Kwf_Model_Row_Abstract $row)
+    {
     }
 }
