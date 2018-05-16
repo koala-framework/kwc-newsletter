@@ -1,0 +1,16 @@
+<div class="{{ rootElementClass }}">
+    {% if recipientNotFound %}
+        {% block recipientNotFound %}
+            <p>
+                {{ data.trlKwf('This link has unfortunately expired.') }}
+            </p>
+            {{ renderer.componentLink(data.parent, data.trlKwf('Sign up again')) }}
+        {% endblock %}
+    {% else %}
+        {% block success %}
+            <p>
+                {{ placeholder.success }}
+            </p>
+        {% endblock %}
+    {% endif %}
+</div>
