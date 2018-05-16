@@ -50,6 +50,7 @@ class Newsletter extends Command
         $mailsPerMinute = $nlRow->getCountOfMailsPerMinute();
 
         // Send in loop
+        $queueModel = $nlRow->getModel()->getDependentModel('Queues');
         $queueLogModel = $nlRow->getModel()->getDependentModel('QueueLogs');
         $count = 0; $countErrors = 0; $countNoUser = 0;
         $start = microtime(true);
@@ -64,10 +65,9 @@ class Newsletter extends Command
                 );
             }
 
-            $nlStatus = $this->newslettersModel->fetchColumnByPrimaryId('status', $nlRow->id);
-            if ($nlStatus != 'sending') {
+            if ($nlRow->getStatus() != 'sending') {
                 $output->writeln(
-                    "break sending because newsletter status changed to '$nlStatus'",
+                    "break sending because newsletter status changed to '{$nlRow->getStatus()}'",
                     OutputInterface::VERBOSITY_VERBOSE
                 );
                 break;
@@ -83,6 +83,14 @@ class Newsletter extends Command
             $rows = $nlRow->getNextQueueRows(getmypid());
             \Kwf_Benchmark::checkpoint('get next recipients');
             foreach ($rows as $row) {
+                if ($nlRow->getStatus() != 'sending') {
+                    $queueModel->getTable()->update(
+                        array('send_process_pid' => null),
+                        "send_process_pid=" . getmypid()
+                    );
+                    break;
+                }
+
                 $recipient = $row->getRecipient();
                 $mc = $nlRow->getMailComponent();
                 if (!$mc->isValidRecipient($recipient)) {
