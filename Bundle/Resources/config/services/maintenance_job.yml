@@ -1,10 +1,4 @@
 services:
-    kwc_newsletter.maintenance_job.start:
-            class: KwcNewsletter\Bundle\MaintenanceJob\StartJob
-            arguments: [@kwc_newsletter.model.newsletters]
-            tags:
-                - { name: 'kwf.maintenance_job' }
-
     kwc_newsletter.maintenance_job.delete_unsubscribed:
             class: KwcNewsletter\Bundle\MaintenanceJob\DeleteUnsubscribedJob
             arguments: [@kwc_newsletter.model.subscribers, "%kwc_newsletter.subscribers.delete_unsubscribed_after_days%"]
