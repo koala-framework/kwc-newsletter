@@ -4,8 +4,15 @@ services:
         arguments: [@kwc_newsletter.model.newsletters]
         tags:
             - { name: 'console.command' }
+
     kwc_newsletter.command.import_subscribers:
         class: KwcNewsletter\Bundle\Command\ImportSubscribers
         arguments: [@kwc_newsletter.importer.parser.csv, @kwc_newsletter.importer.subscriber_factory, @kwc_newsletter.importer.excluder.manager]
+        tags:
+            - { name: 'console.command' }
+
+    kwc_newsletter.command.start_runner:
+        class: KwcNewsletter\Bundle\Command\StartRunner
+        arguments: [@kwc_newsletter.model.newsletters, @kwc_newsletter.model.newsletter_runs]
         tags:
             - { name: 'console.command' }
