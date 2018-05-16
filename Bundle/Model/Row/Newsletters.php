@@ -37,6 +37,26 @@ class Newsletters extends \Kwf_Model_Proxy_Row
         throw new \Kwf_Exception("moved to cli controller");
     }
 
+    protected function _afterSave()
+    {
+        parent::_afterSave();
+
+        if ($this->isDirty('status')) {
+            \Kwf_Cache_Simple::delete("kwcNewsletterStatus-{$this->id}");
+        }
+    }
+
+    public function getStatus()
+    {
+        $cacheId = "kwcNewsletterStatus-{$this->id}";
+        $status = \Kwf_Cache_Simple::fetch($cacheId, $success);
+        if (!$success) {
+            $status = $this->getModel()->fetchColumnByPrimaryId('status', $this->id);
+            \Kwf_Cache_Simple::add($cacheId, $status);
+        }
+        return $status;
+    }
+
     public function getNextQueueRows($sendProcessPid)
     {
         while (true) {
