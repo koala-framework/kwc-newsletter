@@ -57,7 +57,7 @@ class StartRunner extends Command
                 $s = new \Kwf_Model_Select();
                 $s->whereEquals('newsletter_id', $newsletterRow->id);
                 $s->whereNull('send_process_pid');
-                if (!$newsletterRow->getModel()->getDependentModel('Queues')->countRows($s)) {
+                if (!$newsletterRow->getModel()->getDependentModel('Queues')->countRows($s) && empty($procs[$newsletterRow->id])) {
                     $newsletterRow->status = 'finished';
                     $newsletterRow->save();
                     $output->writeln("Newsletter finished.", OutputInterface::VERBOSITY_VERBOSE);
