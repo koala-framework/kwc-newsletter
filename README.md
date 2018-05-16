@@ -3,6 +3,14 @@ Newsletter Component for Koala Framework
 
 ### Installation
 
+### Runner
+
+* Add process-control to `config.ini`
+
+        ...
+        processControl.kwcNewsletterStartRunner.cmd = symfony kwc_newsletter:start_runner
+        ...
+
 #### Bundle
 
 * Add Bundle to `AppKernel`
