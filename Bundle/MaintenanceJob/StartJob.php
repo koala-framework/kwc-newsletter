@@ -126,7 +126,7 @@ class StartJob extends AbstractJob
                 $numOfProcesses = 3;
             }
             while (count($procs[$newsletterRow->id]) < $numOfProcesses) {
-                $cmd = "php bootstrap.php symfony kwc_newsletter:send --newsletterId=$newsletterRow->id";
+                $cmd = "php bootstrap.php symfony kwc_newsletter:send --newsletterId=$newsletterRow->id --no-ansi";
                 if ($debug) $cmd .= " -v";
                 //if ($this->_getParam('benchmark')) $cmd .= " --benchmark";
                 //if ($this->_getParam('verbose')) $cmd .= " --verbose";
