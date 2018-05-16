@@ -19,8 +19,8 @@ class KwcNewsletter_Kwc_Newsletter_Update_20180503RecipientModelShortcut extends
 
         foreach ($classes as $class) {
             foreach (Kwc_Abstract::getSetting($class, 'recipientSources') as $shortcut => $recipientSource) {
-                $db->query("UPDATE `kwc_newsletter_queues` SET `recipient_model_shortcut` = \"{$shortcut}\" WHERE `recipient_model` = \"{$recipientSource['model']}\"");
-                $db->query("UPDATE `kwc_newsletter_queue_logs` SET `recipient_model_shortcut` = \"{$shortcut}\" WHERE `recipient_model` = \"{$recipientSource['model']}\"");
+                $db->query("UPDATE `kwc_newsletter_queues` SET `recipient_model_shortcut` = ? WHERE `recipient_model` = ?", array($shortcut, $recipientSource['model']));
+                $db->query("UPDATE `kwc_newsletter_queue_logs` SET `recipient_model_shortcut` = ? WHERE `recipient_model` = ?", array($shortcut, $recipientSource['model']));
             }
         }
 
