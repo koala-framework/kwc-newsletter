@@ -78,9 +78,18 @@ class KwcNewsletter_Kwc_Newsletter_Detail_RecipientsController extends KwcNewsle
         }
 
         if (($otherNewsletterId = $this->_getParam('query_other_newsletter_id')) && $otherNewsletterId !== 'all') {
+            $recipientModelShortcut = null;
+            foreach (array_keys($rs) as $key) {
+                if ($rs[$key]['model'] == get_class($this->_getModel())) {
+                    $recipientModelShortcut = $key;
+                    break;
+                }
+            }
+            if (!$recipientModelShortcut) throw new Kwf_Exception_Client(trlKwf('Recipients source of this newsletter doesn\'t exist anymore'));
+
             $select = new Kwf_Model_Select();
             $select->whereEquals('newsletter_id', $otherNewsletterId);
-            $select->whereEquals('recipient_model', get_class($this->_getModel()));
+            $select->whereEquals('recipient_model_shortcut', $recipientModelShortcut);
 
             $ret->whereEquals('id', array_map(
                 function ($row) { return $row['recipient_id']; },
