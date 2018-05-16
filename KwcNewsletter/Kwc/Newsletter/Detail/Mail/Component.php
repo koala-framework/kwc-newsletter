@@ -77,7 +77,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Mail_Component extends Kwc_Mail_Compon
         $mail = parent::createMail($recipient, $data, $toAddress, $format, $addViewTracker);
 
         foreach (Kwf_Component_Data_Root::getInstance()->getPlugins('KwcNewsletter_Kwc_Newsletter_PluginInterface') as $plugin) {
-            $plugin->modifyReturnPath($mail, $this->getData()->parent, $recipient);
+            $plugin->modifyMail($mail, $this->getData()->parent, $recipient);
         }
         return $mail;
     }
