@@ -81,7 +81,21 @@ class KwcNewsletter_Kwc_Newsletter_Detail_ExtConfig extends Kwf_Component_Abstra
             )
         ));
 
+        $this->_addRunnerTab($ret);
+
         return $ret;
+    }
+
+    protected function _addRunnerTab(array &$config)
+    {
+        if (Kwf_Registry::get('userModel')->getAuthedUserRole() === 'admin') {
+            $config['form']['tabs']['runner'] = array(
+                'xtype' => 'kwc.newsletter.runs',
+                'controllerUrl' => $this->getControllerUrl('Runs'),
+                'formControllerUrl' => $this->getControllerUrl('Run'),
+                'title' => trlKwf('Runner')
+            );
+        }
     }
 
     protected function _getRecipientSources()

@@ -18,3 +18,8 @@ services:
             class:   KwcNewsletter\Bundle\Model\DeletedSubscriberHashes
             factory: ['Kwf_Model_Abstract', getInstance]
             arguments: ['KwcNewsletter\Bundle\Model\DeletedSubscriberHashes']
+
+    kwc_newsletter.model.newsletter_runs:
+            class:   KwcNewsletter\Bundle\Model\NewsletterRuns
+            factory: ['Kwf_Model_Abstract', getInstance]
+            arguments: ['KwcNewsletter\Bundle\Model\NewsletterRuns']
