@@ -148,16 +148,18 @@ class Newsletter extends Command
                     );
                 }
 
-                $output->write(
-                    array(
-                        "[".getmypid()."] $status in ".round((microtime(true)-$userStart)*1000)."ms (",
-                        "create ".round($createTime*1000)."ms, ",
-                        "send ".round($sendTime*1000)."ms",
-                        ") [".round(memory_get_usage()/(1024*1024))."MB] [".round($count/(microtime(true)-$start), 1)." mails/s]\n"
-                    ),
-                    false,
-                    OutputInterface::VERBOSITY_VERY_VERBOSE
-                );
+                if ($status === 'sent') {
+                    $output->write(
+                        array(
+                            "[".getmypid()."] $status in ".round((microtime(true)-$userStart)*1000)."ms (",
+                            "create ".round($createTime*1000)."ms, ",
+                            "send ".round($sendTime*1000)."ms",
+                            ") [".round(memory_get_usage()/(1024*1024))."MB] [".round($count/(microtime(true)-$start), 1)." mails/s]\n"
+                        ),
+                        false,
+                        OutputInterface::VERBOSITY_VERY_VERBOSE
+                    );
+                }
 
                 if ($status == 'failed' && $output->isVerbose()) {
                     $output->writeln(
