@@ -198,7 +198,7 @@ class Newsletter extends Command
             array(
                 "\n",
                 "$count Newsletters sent ($average/minute), $countErrors errors, $countNoUser user not found.",
-                $info['text']
+                $info['shortText']
             ),
             OutputInterface::VERBOSITY_VERBOSE
         );
