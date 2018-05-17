@@ -71,4 +71,14 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Mail_Component extends Kwc_Mail_Compon
         }
         return $ret;
     }
+
+    public function createMail(Kwc_Mail_Recipient_Interface $recipient, $data = null, $toAddress = null, $format = null, $addViewTracker = true)
+    {
+        $mail = parent::createMail($recipient, $data, $toAddress, $format, $addViewTracker);
+
+        foreach (Kwf_Component_Data_Root::getInstance()->getPlugins('KwcNewsletter_Kwc_Newsletter_PluginInterface') as $plugin) {
+            $plugin->modifyMail($mail, $this->getData()->parent, $recipient);
+        }
+        return $mail;
+    }
 }
