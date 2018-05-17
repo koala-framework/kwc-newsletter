@@ -43,7 +43,7 @@ class StartRunner extends Command
             $this->updateStoppedProcesses($procs, $output);
 
             foreach ($this->getStartedNewsletterRows() as $newsletterRow) {
-                if ($newsletterRow->status != 'sending') {
+                if ($newsletterRow->getStatus() != 'sending') {
                     $newsletterRow->resume_date = date('Y-m-d H:i:s');
                     $newsletterRow->status = 'sending';
                     if (is_null($newsletterRow->count_sent)) $newsletterRow->count_sent = 0;
