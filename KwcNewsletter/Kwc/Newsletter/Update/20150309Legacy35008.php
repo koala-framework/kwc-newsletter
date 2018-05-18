@@ -1,8 +1,3 @@
-
-
-
-
-
 <?php
 class KwcNewsletter_Kwc_Newsletter_Update_20150309Legacy35008 extends Kwf_Update
 {
