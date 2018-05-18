@@ -128,11 +128,13 @@ class StartRunner extends Command
             $runRow->status = 'starting';
             $runRow->save();
 
+            $table = $this->newsletterRunsModel->getTableName();
+
             $process = new Process($cmd);
-            $process->start(function($type, $buffer) use ($output, $runRow) {
+            $process->start(function($type, $buffer) use ($output, $runRow, $table) {
                 $output->writeln($buffer, Process::ERR === $type ? OutputInterface::OUTPUT_NORMAL : OutputInterface::VERBOSITY_VERBOSE);
 
-                \Kwf_Registry::get('db')->query("UPDATE {$this->newsletterRunsModel->getTableName()} SET log=CONCAT(log, ?) WHERE id=?", array($buffer, $runRow->id));
+                \Kwf_Registry::get('db')->query("UPDATE {$table} SET log=CONCAT(log, ?) WHERE id=?", array($buffer, $runRow->id));
             });
             $procs[$newsletterRow->id][$process->getPid()] = $process;
 
