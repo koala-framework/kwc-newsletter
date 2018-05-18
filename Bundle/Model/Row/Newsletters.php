@@ -41,7 +41,7 @@ class Newsletters extends \Kwf_Model_Proxy_Row
     {
         parent::_afterSave();
 
-        if ($this->isDirty('status')) {
+        if ($this->getStatus() !== $this->status) {
             \Kwf_Cache_Simple::delete("kwcNewsletterStatus-{$this->id}");
         }
     }
