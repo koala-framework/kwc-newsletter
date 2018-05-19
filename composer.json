@@ -14,6 +14,12 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "license": "BSD-2-Clause",
+    "extra": {
+        "kwf-lingohub": {
+            "account": "vivid-planet",
+            "project": "kwc-newsletter"
+        }
+    },
     "autoload": {
         "psr-0": {
             "KwcNewsletter_": ""
