@@ -76,10 +76,7 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Component extends Kwc_Form_Componen
             'email' => $fnfRow->email
         ));
 
-        $row->gender = $fnfRow->gender;
-        $row->title = $fnfRow->title;
-        $row->firstname = $fnfRow->firstname;
-        $row->lastname = $fnfRow->lastname;
+        $this->_updateRow($row, $fnfRow);
 
         $sendActivationMail = false;
         if (!$row->activated || $row->unsubscribed) {
@@ -113,6 +110,14 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Component extends Kwc_Form_Componen
 
             \Kwf_Cache_Simple::add($sendOneActivationMailForEmailPerHourCacheId, true, 3600);
         }
+    }
+
+    protected function _updateRow(Kwf_Model_Row_Interface $row, Kwf_Model_Row_Interface $fnfRow)
+    {
+        $row->gender = $fnfRow->gender;
+        $row->title = $fnfRow->title;
+        $row->firstname = $fnfRow->firstname;
+        $row->lastname = $fnfRow->lastname;
     }
 
     protected function _getCategories()
