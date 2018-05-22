@@ -9,6 +9,11 @@ services:
             factory: ['Kwf_Model_Abstract', getInstance]
             arguments: ['KwcNewsletter\Bundle\Model\Subscribers']
 
+    kwc_newsletter.model.newsletter_queues:
+            class:   KwcNewsletter\Bundle\Model\NewsletterQueues
+            factory: ['Kwf_Model_Abstract', getInstance]
+            arguments: ['KwcNewsletter\Bundle\Model\NewsletterQueues']
+
     kwc_newsletter.model.newsletter_queue_logs:
             class:   KwcNewsletter\Bundle\Model\NewsletterQueueLogs
             factory: ['Kwf_Model_Abstract', getInstance]

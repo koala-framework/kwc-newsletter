@@ -16,3 +16,9 @@ services:
             arguments: [@kwc_newsletter.model.newsletter_queue_logs]
             tags:
                 - { name: 'kwf.maintenance_job' }
+
+    kwc_newsletter.maintenance_job.delete_queues:
+            class: KwcNewsletter\Bundle\MaintenanceJob\DeleteQueuesJob
+            arguments: [@kwc_newsletter.model.newsletter_queues]
+            tags:
+                - { name: 'kwf.maintenance_job' }
