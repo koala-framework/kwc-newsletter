@@ -85,6 +85,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Component extends Kwc_Directories_Item
         $mail = $this->getData()->getChildComponent('_mail')->getComponent();
         $select = $mail->getValidRecipientSelect($model, $select);
 
+        $createDate = date('Y-m-d H:i:s');
         $mapping = $model->getColumnMappings('Kwc_Mail_Recipient_Mapping');
         $import = array();
         $emails = array();
@@ -100,8 +101,8 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Component extends Kwc_Directories_Item
                 'newsletter_id' => $newsletter->id,
                 'recipient_model_shortcut' => $this->_getRecipientModelShortcutFromModel($mail, get_class($model)),
                 'recipient_id' => $e['id'],
-                'searchtext' =>
-                    $searchText
+                'searchtext' => $searchText,
+                'create_date' => $createDate
             );
             $emails[] = $e[$mapping['email']];
         }
