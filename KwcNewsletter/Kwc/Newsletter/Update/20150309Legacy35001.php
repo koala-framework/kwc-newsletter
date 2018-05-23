@@ -10,6 +10,12 @@ class KwcNewsletter_Kwc_Newsletter_Update_20150309Legacy35001 extends Kwf_Update
             $db->query("RENAME TABLE kwc_newsletter_categories TO kwc_newsletter_subscribecategories;");
             $db->query("ALTER TABLE `kwc_newsletter_subscribecategories` CHANGE `category` `name` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;");
             $db->query("ALTER TABLE `kwc_newsletter_subscribecategories` CHANGE `kwf_pool_id` `category_id` SMALLINT( 5 ) UNSIGNED NOT NULL;");
+
+            if ($db->query("SHOW COLUMNS FROM `kwc_newsletter_subscribecategories` LIKE 'kwf_pool_id'")->fetchColumn()) {
+                $db->query("ALTER TABLE `kwc_newsletter_subscribecategories` CHANGE `kwf_pool_id` `category_id` SMALLINT( 5 ) UNSIGNED NOT NULL;");
+            } else if (!$db->query("SHOW COLUMNS FROM `kwc_newsletter_subscribecategories` LIKE 'category_id'")->fetchColumn()) {
+                $db->query("ALTER TABLE `kwc_newsletter_subscribecategories` ADD `category_id` SMALLINT(5) UNSIGNED NOT NULL ;");
+            }
         }
 
         $sql = "CREATE TABLE IF NOT EXISTS `kwc_newsletter_categories` (
