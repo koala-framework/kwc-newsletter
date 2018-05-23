@@ -26,10 +26,6 @@ class DeleteQueuesJob extends AbstractJob
     {
         $select = new \Kwf_Model_Select();
         $select->whereNull('status');
-        $select->where(new \Kwf_Model_Select_Expr_LowerEqual(
-            new \Kwf_Model_Select_Expr_Field('create_date'),
-            new \Kwf_Date(strtotime("-1 month"))
-        ));
         $ids = array_map(
             function($row) { return $row['id']; },
             $this->queuesModel->getReferencedModel('Newsletter')->export(
@@ -39,6 +35,10 @@ class DeleteQueuesJob extends AbstractJob
 
         $select = new \Kwf_Model_Select();
         $select->whereEquals('newsletter_id', $ids);
+        $select->where(new \Kwf_Model_Select_Expr_LowerEqual(
+            new \Kwf_Model_Select_Expr_Field('create_date'),
+            new \Kwf_Date(strtotime("-1 week"))
+        ));
 
         $count = $this->queuesModel->countRows($select);
         if ($count > 0) {
