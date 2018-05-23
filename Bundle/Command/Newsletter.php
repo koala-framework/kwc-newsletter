@@ -55,16 +55,6 @@ class Newsletter extends Command
         $count = 0; $countErrors = 0; $countNoUser = 0;
         $start = microtime(true);
         do {
-            // Sleep while calculation time
-            if ($nlRow->mails_per_minute != 'unlimited') {
-                $sleep = $start + 60/$mailsPerMinute * $count - microtime(true);
-                if ($sleep > 0) usleep($sleep * 1000000);
-                $output->writeln(
-                    "sleeping {$sleep}s",
-                    OutputInterface::VERBOSITY_VERBOSE
-                );
-            }
-
             if ($nlRow->getStatus() != 'sending') {
                 $output->writeln(
                     "break sending because newsletter status changed to '{$nlRow->getStatus()}'",
@@ -72,7 +62,6 @@ class Newsletter extends Command
                 );
                 break;
             }
-
 
             \Kwf_Benchmark::enable();
             \Kwf_Benchmark::reset();
@@ -89,6 +78,16 @@ class Newsletter extends Command
                         "send_process_pid=" . getmypid()
                     );
                     break;
+                }
+
+                // Sleep while calculation time
+                if ($nlRow->mails_per_minute != 'unlimited') {
+                    $sleep = $start + 60/$mailsPerMinute * $count - microtime(true);
+                    if ($sleep > 0) usleep($sleep * 1000000);
+                    $output->writeln(
+                        "sleeping {$sleep}s",
+                        OutputInterface::VERBOSITY_VERBOSE
+                    );
                 }
 
                 $recipient = $row->getRecipient();
