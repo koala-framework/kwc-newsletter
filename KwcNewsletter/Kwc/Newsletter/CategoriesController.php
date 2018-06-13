@@ -3,7 +3,7 @@ class KwcNewsletter_Kwc_Newsletter_CategoriesController extends Kwf_Controller_A
 {
     protected $_modelName = 'KwcNewsletter\Bundle\Model\Categories';
     protected $_position = 'pos';
-    protected $_buttons = array('csv');
+    protected $_buttons = array('save', 'add', 'delete', 'csv');
 
     protected function _initColumns()
     {
