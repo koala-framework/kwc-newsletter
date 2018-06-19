@@ -9,6 +9,16 @@ services:
             factory: ['Kwf_Model_Abstract', getInstance]
             arguments: ['KwcNewsletter\Bundle\Model\Subscribers']
 
+    kwc_newsletter.model.subscribers_to_categories:
+            class:   KwcNewsletter\Bundle\Model\SubscribersToCategories
+            factory: ['Kwf_Model_Abstract', getInstance]
+            arguments: ['KwcNewsletter\Bundle\Model\SubscribersToCategories']
+
+    kwc_newsletter.model.newsletter_subscriber_logs:
+            class:   KwcNewsletter\Bundle\Model\SubscriberLogs
+            factory: ['Kwf_Model_Abstract', getInstance]
+            arguments: ['KwcNewsletter\Bundle\Model\SubscriberLogs']
+
     kwc_newsletter.model.newsletter_queues:
             class:   KwcNewsletter\Bundle\Model\NewsletterQueues
             factory: ['Kwf_Model_Abstract', getInstance]
