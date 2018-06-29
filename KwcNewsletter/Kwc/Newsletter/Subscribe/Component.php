@@ -57,7 +57,7 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Component extends Kwc_Form_Componen
         $select->whereEquals('activated', true);
         $select->whereEquals('unsubscribed', false);
         if (Kwf_Model_Abstract::getInstance($this->_getSetting('subscribersModel'))->countRows($select)) {
-            throw new Kwf_Exception_Client('You are already subscribed to this newsletter.');
+            throw new Kwf_Exception_Client($this->getData()->trlKwf('You are already subscribed to this newsletter.'));
         }
     }
 
