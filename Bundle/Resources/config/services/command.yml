@@ -16,3 +16,9 @@ services:
         arguments: [@kwc_newsletter.model.newsletters, @kwc_newsletter.model.newsletter_runs]
         tags:
             - { name: 'console.command' }
+
+    kwc_newsletter.command.combine_category_subscribers:
+        class: KwcNewsletter\Bundle\Command\CombineCategorySubscribers
+        arguments: [@kwc_newsletter.model.newsletters, @kwc_newsletter.model.subscribers_to_categories, @kwc_newsletter.model.newsletter_subscriber_logs]
+        tags:
+            - { name: 'console.command' }

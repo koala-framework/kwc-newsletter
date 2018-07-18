@@ -41,5 +41,7 @@ class Subscribers extends \Kwf_Model_Db
         $select = clone $abstractSelect;
         $select->whereEquals('state', 'unsubscribed');
         $this->_exprs['last_unsubscribe_date'] = new \Kwf_Model_Select_Expr_Child_First('Logs', 'date', $select);
+
+        $this->_exprs['category_ids'] = new \Kwf_Model_Select_Expr_Child_GroupConcat('ToCategories', 'category_id');
     }
 }
