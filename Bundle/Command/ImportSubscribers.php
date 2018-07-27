@@ -20,15 +20,15 @@ class ImportSubscribers extends Command
     /**
      * @var CsvParser
      */
-    private $parser;
+    protected $parser;
     /**
      * @var SubscriberFactory
      */
-    private $subscriberFactory;
+    protected $subscriberFactory;
     /**
      * @var ExcluderManager
      */
-    private $excluderManager;
+    protected $excluderManager;
 
     /**
      * @var string
@@ -37,19 +37,19 @@ class ImportSubscribers extends Command
     /**
      * @var string
      */
-    private $newsletterComponentId;
+    protected $newsletterComponentId;
     /**
      * @var string
      */
-    private $logSource;
+    protected $logSource;
     /**
      * @var integer
      */
-    private $categoryId;
+    protected $categoryId;
     /**
      * @var boolean
      */
-    private $dryRun = false;
+    protected $dryRun = false;
     /**
      * @var ProgressBar
      */
@@ -57,7 +57,7 @@ class ImportSubscribers extends Command
     /**
      * @var boolean
      */
-    private $ignoreDoubleOptIn = false;
+    protected $ignoreDoubleOptIn = false;
 
     public function __construct(CsvParser $parser, SubscriberFactory $subscriberFactory, ExcluderManager $excluderManager)
     {
@@ -133,13 +133,7 @@ class ImportSubscribers extends Command
             throw new RuntimeException("First line of CSV must include \"email\" column");
         }
 
-        $subscriber = $this->subscriberFactory->create(
-            $this->newsletterComponentId,
-            $this->logSource,
-            $this->categoryId,
-            $this->ignoreDoubleOptIn,
-            $this->dryRun
-        );
+        $subscriber = $this->createSubscriberServiceFromFactory();
         $this->progressBar = new ProgressBar($output, $this->parser->count());
         $this->progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s%');
         $this->progressBar->start();
@@ -154,7 +148,20 @@ class ImportSubscribers extends Command
         $this->progressBar->finish();
     }
 
-    private function startQuestions(InputInterface $input, OutputInterface $output)
+    protected function createSubscriberServiceFromFactory()
+    {
+        return $this->subscriberFactory->create(
+            $this->newsletterComponentId,
+            $this->logSource,
+            $this->categoryId,
+            array(
+                'ignoreDoubleOptIn' => $this->ignoreDoubleOptIn,
+                'dryRun' => $this->dryRun,
+            )
+        );
+    }
+
+    protected function startQuestions(InputInterface $input, OutputInterface $output)
     {
         $helper = $this->getHelper('question');
 

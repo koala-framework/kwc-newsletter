@@ -12,37 +12,33 @@ class Subscriber
     /**
      * @var Subscribers
      */
-    private $subscribersModel;
+    protected $subscribersModel;
     /**
      * @var SubscribersToCategories
      */
-    private $subscribersToCategoriesModel;
+    protected $subscribersToCategoriesModel;
     /**
      * @var Categories
      */
-    private $categoriesModel;
+    protected $categoriesModel;
     /**
      * @var \Kwf_Component_Data
      */
-    private $newsletterComponent;
+    protected $newsletterComponent;
     /**
      * @var integer
      */
-    private $categoryId;
-    /**
-     * @var boolean
-     */
-    private $ignoreDoubleOptIn = false;
+    protected $categoryId;
     /**
      * @var string
      */
-    private $logSource;
+    protected $logSource;
     /**
-     * @var boolean
+     * @var array
      */
-    private $dryRun = false;
+    protected $options = array();
 
-    public function __construct(Subscribers $model, $newsletterComponentId, $logSource, $categoryId = null, $ignoreDoubleOptIn = false, $dryRun = false)
+    public function __construct(Subscribers $model, $newsletterComponentId, $logSource, $categoryId = null, array $options = array())
     {
         $this->subscribersModel = $model;
         $this->subscribersToCategoriesModel = $this->subscribersModel->getDependentModel('ToCategories');
@@ -55,45 +51,33 @@ class Subscriber
         $this->newsletterComponent = $component;
         $this->logSource = $logSource;
 
-        $select = new \Kwf_Model_Select();
-        $select->whereId($categoryId);
-        $select->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
-        if (!$this->categoriesModel->countRows($select)) {
+        if (!$this->categoriesModel->countRows($this->getCategorySelect($categoryId))) {
             throw new Exception("Category ID \"$categoryId\" for newsletter \"{$this->newsletterComponent->dbId}\" not found");
         }
         $this->categoryId = $categoryId;
 
-        $this->ignoreDoubleOptIn = $ignoreDoubleOptIn;
-        $this->dryRun = $dryRun;
+        $this->options = $options;
+        if (!array_key_exists('ignoreDoubleOptIn', $options)) $this->options['ignoreDoubleOptIn'] = false;
+        if (!array_key_exists('dryRun', $options)) $this->options['dryRun'] = false;
     }
 
     public function save(array $data)
     {
         if (!$this->newsletterComponent) {
             throw new Exception('Newsletter component isn\'t set');
-        } else if(!$this->logSource) {
+        } else if (!$this->logSource) {
             throw new Exception('Log source isn\'t set');
         }
 
         $db = $this->subscribersModel->getAdapter();
         $db->beginTransaction();
         try {
-            $select = $this->subscribersModel->select();
-            $select->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
-            $select->whereEquals('email', $data['email']);
-            $subscriber = $this->subscribersModel->getRow($select);
+            $subscriber = $this->subscribersModel->getRow($this->getSelect($data));
             if (!$subscriber) {
-                $row = array(
-                    'newsletter_component_id' => $this->newsletterComponent->dbId,
-                    'email' => $data['email'],
-                    'format' => 'html',
-                    'unsubscribed' => false,
-                    'activated' => $this->ignoreDoubleOptIn
-                );
-                $subscriber = $this->subscribersModel->createRow($row);
+                $subscriber = $this->subscribersModel->createRow($this->getDefaultData($data));
                 $this->applyData($subscriber, $data);
                 $subscriber->setLogSource($this->logSource);
-                if ($this->ignoreDoubleOptIn) {
+                if ($this->options['ignoreDoubleOptIn']) {
                     $subscriber->writeLog($this->newsletterComponent->trlKwf('Subscribed and activated'), 'activated');
                 } else {
                     $subscriber->writeLog($this->newsletterComponent->trlKwf('Subscribed'), 'subscribed');
@@ -101,7 +85,7 @@ class Subscriber
             } else {
                 $this->applyData($subscriber, $data);
 
-                if ($this->ignoreDoubleOptIn && !$subscriber->activated && !$subscriber->unsubscribed) {
+                if ($this->options['ignoreDoubleOptIn'] && !$subscriber->activated && !$subscriber->unsubscribed) {
                     $subscriber->activated = true;
                     $subscriber->setLogSource($this->logSource);
                     $subscriber->writeLog($this->newsletterComponent->trlKwf('Activated'), 'activated');
@@ -114,7 +98,7 @@ class Subscriber
                 $this->addSubscriberToCategory($subscriber);
             }
 
-            if (!$this->dryRun) {
+            if (!$this->options['dryRun']) {
                 if (!$subscriber->activated && !$subscriber->unsubscribed) $this->sendActivationMail($subscriber);
 
                 $db->commit();
@@ -140,6 +124,33 @@ class Subscriber
             $subscriber->setLogSource($this->logSource);
             $category->save();
         }
+    }
+
+    protected function getCategorySelect($categoryId)
+    {
+        $select = new \Kwf_Model_Select();
+        $select->whereId($categoryId);
+        $select->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+        return $select;
+    }
+
+    protected function getSelect(array $data)
+    {
+        $select = $this->subscribersModel->select();
+        $select->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+        $select->whereEquals('email', $data['email']);
+        return $select;
+    }
+
+    protected function getDefaultData(array $data)
+    {
+        return array(
+            'newsletter_component_id' => $this->newsletterComponent->dbId,
+            'email' => $data['email'],
+            'format' => 'html',
+            'unsubscribed' => false,
+            'activated' => $this->options['ignoreDoubleOptIn']
+        );
     }
 
     protected function applyData(RowSubscribers $row, array $data)
