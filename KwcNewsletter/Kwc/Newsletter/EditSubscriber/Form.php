@@ -17,7 +17,7 @@ class KwcNewsletter_Kwc_Newsletter_EditSubscriber_Form extends KwcNewsletter_Kwc
         $select->whereEquals('newsletter_component_id', $this->_newsletterComponentId);
         $select->order('pos');
 
-        $this->add(new Kwf_Form_Field_MultiCheckbox('ToCategories', 'Category', trlKwf('Categories')))
+        $this->add(new Kwf_Form_Field_MultiCheckbox('ToCategories', 'Category', trlKwf('Categories'), 'categories'))
             ->setValuesSelect($select)
             ->setWidth(255)
             ->setAllowBlank(false);
