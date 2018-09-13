@@ -58,7 +58,7 @@ class Newsletter extends Command
             if ($nlRow->getStatus() != 'sending') {
                 $output->writeln(
                     "break sending because newsletter status changed to '{$nlRow->getStatus()}'",
-                    OutputInterface::VERBOSITY_VERBOSE
+                    OutputInterface::VERBOSITY_NORMAL
                 );
                 break;
             }
@@ -86,7 +86,7 @@ class Newsletter extends Command
                     if ($sleep > 0) usleep($sleep * 1000000);
                     $output->writeln(
                         "sleeping {$sleep}s",
-                        OutputInterface::VERBOSITY_VERBOSE
+                        OutputInterface::VERBOSITY_NORMAL
                     );
                 }
 
@@ -143,7 +143,7 @@ class Newsletter extends Command
                 if (\Kwf_Benchmark::isEnabled() && $input->getOption('benchmark')) {
                     $output->writeln(
                         \Kwf_Benchmark::getCheckpointOutput(),
-                        OutputInterface::VERBOSITY_VERY_VERBOSE
+                        OutputInterface::VERBOSITY_VERBOSE
                     );
                 }
 
@@ -156,7 +156,7 @@ class Newsletter extends Command
                             ") [".round(memory_get_usage()/(1024*1024))."MB] [".round($count/(microtime(true)-$start), 1)." mails/s]\n"
                         ),
                         false,
-                        OutputInterface::VERBOSITY_VERY_VERBOSE
+                        OutputInterface::VERBOSITY_VERBOSE
                     );
                 }
 
@@ -173,7 +173,7 @@ class Newsletter extends Command
             if (memory_get_usage() > 100*1024*1024) {
                 $output->writeln(
                     "stopping because of >100MB memory usage",
-                    OutputInterface::VERBOSITY_VERBOSE
+                    OutputInterface::VERBOSITY_NORMAL
                 );
 
                 break;
@@ -201,7 +201,7 @@ class Newsletter extends Command
                 "$count Newsletters sent ($average/minute), $countErrors errors, $countNoUser user not found.",
                 $info['shortText']
             ),
-            OutputInterface::VERBOSITY_VERBOSE
+            OutputInterface::VERBOSITY_NORMAL
         );
 
         \Kwf_Events_ModelObserver::getInstance()->enable();
