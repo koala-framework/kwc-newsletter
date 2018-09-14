@@ -115,9 +115,9 @@ class StartRunner extends Command
             $numOfProcesses = 3;
         }
         while (count($procs[$newsletterRow->id]) < $numOfProcesses) {
-            $cmd = "php bootstrap.php symfony kwc_newsletter:send --newsletterId=$newsletterRow->id --no-ansi -v";
+            $cmd = "php bootstrap.php symfony kwc_newsletter:send --newsletterId=$newsletterRow->id --no-ansi";
             if ($output->isVerbose()) {
-                $cmd .= "v";
+                $cmd .= " -v";
             }
 
             $runRow = $this->newsletterRunsModel->createRow();
