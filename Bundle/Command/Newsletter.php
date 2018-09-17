@@ -86,7 +86,7 @@ class Newsletter extends Command
                     if ($sleep > 0) usleep($sleep * 1000000);
                     $output->writeln(
                         "sleeping {$sleep}s",
-                        OutputInterface::VERBOSITY_NORMAL
+                        OutputInterface::VERBOSITY_VERBOSE
                     );
                 }
 
