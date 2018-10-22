@@ -69,9 +69,12 @@ class SubscribersApiController extends Controller
 
         $this->updateRow($row, $paramFetcher);
 
+        $row->setLogSource(($source = $paramFetcher->get('source')) ? $source : $subroot->trlKwf('Subscribe API'));
+        $row->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
+
         $sendActivationMail = false;
         if (!$row->activated || $row->unsubscribed) {
-            $this->writeLog($subroot, $row, $paramFetcher, $request);
+            $row->writeLog($subroot->trlKwf('Subscribed'), 'subscribed');
 
             $row->unsubscribed = false;
             $row->activated = false;
@@ -148,12 +151,5 @@ class SubscribersApiController extends Controller
             'editComponent' => $newsletterComponent->getChildComponent('_editSubscriber'),
             'doubleOptInComponent' => $subscribe->getChildComponent('_doubleOptIn')
         ));
-    }
-
-    protected function writeLog(\Kwf_Component_Data $subroot, \Kwf_Model_Row_Abstract $row, ParamFetcher $paramFetcher, Request $request)
-    {
-        $row->setLogSource(($source = $paramFetcher->get('source')) ? $source : $subroot->trlKwf('Subscribe API'));
-        $row->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
-        $row->writeLog($subroot->trlKwf('Subscribed'), 'subscribed');
     }
 }
