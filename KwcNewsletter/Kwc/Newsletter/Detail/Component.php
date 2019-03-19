@@ -35,6 +35,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Component extends Kwc_Directories_Item
         $ret['checkRtrList'] = !!Kwf_Config::getValue('service.rtrlist.url');
         $ret['flags']['skipFulltext'] = true;
         $ret['flags']['noIndex'] = true;
+        $ret['flags']['skipPagesMeta'] = true;
 
         $ret['extConfig'] = 'KwcNewsletter_Kwc_Newsletter_Detail_ExtConfig';
 
