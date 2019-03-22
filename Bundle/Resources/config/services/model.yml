@@ -38,3 +38,13 @@ services:
             class:   KwcNewsletter\Bundle\Model\NewsletterRuns
             factory: ['Kwf_Model_Abstract', getInstance]
             arguments: ['KwcNewsletter\Bundle\Model\NewsletterRuns']
+
+    kwc_newsletter.model.newsletter_api_keys:
+      class:   KwcNewsletter\Bundle\Model\NewsletterApiKeys
+      factory: ['Kwf_Model_Abstract', getInstance]
+      arguments: ['KwcNewsletter\Bundle\Model\NewsletterApiKeys']
+
+    kwc_newsletter.model.categories:
+      class:   KwcNewsletter\Bundle\Model\Categories
+      factory: ['Kwf_Model_Abstract', getInstance]
+      arguments: ['KwcNewsletter\Bundle\Model\Categories']

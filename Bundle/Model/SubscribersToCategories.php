@@ -1,10 +1,18 @@
 <?php
+
 namespace KwcNewsletter\Bundle\Model;
 
 class SubscribersToCategories extends \Kwf_Model_Db
 {
     protected $_table = 'kwc_newsletter_subscribers_to_categories';
     protected $_rowClass = 'KwcNewsletter\Bundle\Model\Row\SubscribersToCategories';
+    protected $_serialization = array(
+        'category' => array(
+            'type' => 'KwfBundle\Serializer\KwfModel\ColumnNormalizer\ParentRow',
+            'groups' => 'user',
+            'rule' => 'Category',
+        ),
+    );
 
     protected function _init()
     {

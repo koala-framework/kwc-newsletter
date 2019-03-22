@@ -1,4 +1,5 @@
 <?php
+
 namespace KwcNewsletter\Bundle\Model;
 
 class Subscribers extends \Kwf_Model_Db
@@ -18,6 +19,17 @@ class Subscribers extends \Kwf_Model_Db
         'Kwc_Mail_Recipient_UnsubscribableMapping' => array(
             'unsubscribed' => 'unsubscribed'
         )
+    );
+    protected $_serialization = array(
+        'gender' => 'user',
+        'title' => 'user',
+        'firstname' => 'user',
+        'lastname' => 'user',
+        'email' => 'user',
+        'last_subscribe_date' => 'user',
+        'last_activated_date' => 'user',
+        'last_unsubscribe_date' => 'user',
+        'category_ids' => 'user',
     );
 
     protected function _init()
