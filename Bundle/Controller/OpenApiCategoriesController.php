@@ -143,13 +143,13 @@ class OpenApiCategoriesController extends Controller
      * @Route("/categories/{id}/subscribers", requirements={"id"="[1-9]{1}\d*"})
      * @RequestParam(name="subscribers", requirements="[1-9]{1}\d*", strict=true, nullable=false, array=true)
      * @RequestParam(name="source", strict=true, nullable=true)
+     * @RequestParam(name="ip", requirements=@Ip, strict=true, nullable=true)
      * @Method("POST")
      * @View(serializerGroups={"user"})
      */
-    public function postCategorySubscribersAction($id, ParamFetcher $paramFetcher)
+    public function postCategorySubscribersAction($id, ParamFetcher $paramFetcher, Request $request)
     {
         $this->validator->validateAndThrow($paramFetcher);
-
 
         $s = $this->model->select();
         $s->whereEquals('id', $id);
@@ -205,6 +205,7 @@ class OpenApiCategoriesController extends Controller
                         $source :
                         trlKwf('Subscribe Open API. API Key: {0}', array($this->getUser()->getUsername())
                         ));
+                $subscriber->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
 
                 $category->save();
                 $ret['added']++;
@@ -221,10 +222,11 @@ class OpenApiCategoriesController extends Controller
      * @Route("/categories/{id}/subscribers", requirements={"id"="[1-9]{1}\d*"})
      * @RequestParam(name="subscribers", requirements="[1-9]{1}\d*", strict=true, nullable=false, array=true)
      * @RequestParam(name="source", strict=true, nullable=true)
+     * @RequestParam(name="ip", requirements=@Ip, strict=true, nullable=true)
      * @Method("DELETE")
      * @View(serializerGroups={"user"})
      */
-    public function deleteCategorySubscribersAction($id, ParamFetcher $paramFetcher)
+    public function deleteCategorySubscribersAction($id, ParamFetcher $paramFetcher, Request $request)
     {
         $this->validator->validateAndThrow($paramFetcher);
 
@@ -267,6 +269,7 @@ class OpenApiCategoriesController extends Controller
                     $source :
                     trlKwf('Subscribe Open API. API Key: {0}', array($this->getUser()->getUsername())
                     ));
+            $subscriber->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
         }
 
         // find subscribers in category

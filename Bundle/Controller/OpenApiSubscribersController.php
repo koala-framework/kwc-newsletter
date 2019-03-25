@@ -155,6 +155,140 @@ class OpenApiSubscribersController extends Controller
         return null;
     }
 
+    /**
+     * @Route("/subscribers")
+     * @Method("POST")
+     *
+     * @RequestParam(name="gender", requirements="(male|female)", strict=true, nullable=true)
+     * @RequestParam(name="title", strict=true, nullable=true)
+     * @RequestParam(name="firstname", strict=true)
+     * @RequestParam(name="lastname", strict=true)
+     * @RequestParam(name="email", requirements=@Email, strict=true)
+     * @RequestParam(name="categories", requirements="\d+", strict=true, nullable=true, array=true)
+     * @RequestParam(name="source", strict=true, nullable=true)
+     * @RequestParam(name="ip", requirements=@Ip, strict=true, nullable=true)
+     * @RequestParam(name="doubleOptIn", requirements="(1|)", strict=true, nullable=true, default=true)
+     */
+    public function postSubscribeAction(ParamFetcher $paramFetcher, Request $request)
+    {
+        $this->validator->validateAndThrow($paramFetcher);
+
+        $doubleOptIn = $paramFetcher->get('doubleOptIn');
+
+        $email = $paramFetcher->get('email');
+        $s = $this->model->select();
+        $s->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+        $s->whereEquals('email', $email);
+        $row = $this->model->getRow($s);
+        if (!$row) {
+            $row = $this->model->createRow(array(
+                'newsletter_component_id' => $this->newsletterComponent->dbId,
+                'email' => $email,
+            ));
+        }
+
+        // activate it immediately
+        if (!$doubleOptIn) {
+            $row->activated = true;
+        }
+
+        // fetch optional parameters
+        $this->updateRow($row, $paramFetcher);
+
+        $row->setLogSource(
+            ($source = $paramFetcher->get('source')) ?
+                $source :
+                trlKwf('Subscribe Open API. API Key: {0}', array($this->getUser()->getUsername())
+                ));
+        $row->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
+
+        $sendActivationMail = false;
+        if ($row->activated) {
+            $row->writeLog(trlKwf('Subscribed and activated'), 'activated');
+        } elseif (!$row->activated || $row->unsubscribed) {
+            $row->writeLog(trlKwf('Subscribed'), 'subscribed');
+
+            $row->unsubscribed = false;
+            $row->activated = false;
+
+            $sendActivationMail = true;
+        }
+
+        // statistics
+        $categoriesRet = array(
+            'total' => 0,
+            'added' => 0,
+            'not_found' => 0,
+            'exists' => 0,
+        );
+        if (count($categories = $request->get('categories'))) {
+
+            $categoriesRet = array(
+                'total' => count($categories),
+                'added' => 0,
+                'not_found' => 0,
+                'exists' => 0,
+            );
+
+            $subscribersToCategoryModel = $this->model->getDependentModel('ToCategories');
+            $categoriesModel = $subscribersToCategoryModel->getReferencedModel('Category');
+
+            foreach ($categories as $categoryId) {
+                $s = $categoriesModel->select();
+                $s->whereEquals('id', $categoryId);
+                $s->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+                $categoryRow = $categoriesModel->getRow($s);
+
+                if ($categoryRow) {
+                    $s = $this->model->select();
+                    $s->whereEquals('category_id', $categoryId);
+                    if (!$row->countChildRows('ToCategories', $s)) {
+                        $row->createChildRow('ToCategories', array(
+                            'category_id' => $categoryId
+                        ));
+                        $categoriesRet['added']++;
+                    } else {
+                        $categoriesRet['exists']++;
+                    }
+                } else {
+                    $categoriesRet['not_found']++;
+                }
+            }
+        }
+
+        if ($row->isDirty()) $row->save();
+
+        $sendOneActivationMailForEmailPerHourCacheId = 'send-one-activation-mail-for-email-per-hour-' . md5($email);
+        $sendOneActivationMailForEmailPerHour = \Kwf_Cache_Simple::fetch($sendOneActivationMailForEmailPerHourCacheId);
+        if (!$sendOneActivationMailForEmailPerHour && $sendActivationMail) {
+            $this->sendActivationMail($this->newsletterComponent, $row);
+
+            \Kwf_Cache_Simple::add($sendOneActivationMailForEmailPerHourCacheId, true, 3600);
+        }
+
+        return array(
+            'message' => trlKwf(
+                $doubleOptIn ? 'Thank you for your subscription. If you have not been added to our newsletter-distributor yet, you will shortly receive an email with your activation link. Please click on the link to confirm your subscription.' :
+                'Thank you for your subscription. Your subscription was successfully activated.'
+            ),
+            'categories' => $categoriesRet,
+        );
+    }
+
+    protected function sendActivationMail(\Kwf_Component_Data $newsletterComponent, \Kwc_Mail_Recipient_Interface $row)
+    {
+        $subscribe = \Kwf_Component_Data_Root::getInstance()->getComponentByClass(
+            'KwcNewsletter_Kwc_Newsletter_Subscribe_Component', array('subroot' => $newsletterComponent->getSubroot(), 'limit' => 1)
+        );
+        $subscribe->getChildComponent('_mail')->getComponent()->send($row, array(
+            'formRow' => $row,
+            'host' => $newsletterComponent->getDomain(),
+            'unsubscribeComponent' => null,
+            'editComponent' => $newsletterComponent->getChildComponent('_editSubscriber'),
+            'doubleOptInComponent' => $subscribe->getChildComponent('_doubleOptIn')
+        ));
+    }
+
     protected function updateRow(\Kwf_Model_Row_Abstract $row, ParamFetcher $paramFetcher)
     {
         $row->gender = strtolower($paramFetcher->get('gender'));

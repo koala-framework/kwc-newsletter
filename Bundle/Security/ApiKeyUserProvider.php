@@ -4,6 +4,7 @@ namespace KwcNewsletter\Bundle\Security;
 
 use KwcNewsletter\Bundle\Model\NewsletterApiKeys;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
