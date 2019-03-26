@@ -1,44 +1,42 @@
 <?php
+
 namespace KwcNewsletter\Bundle\Controller;
 
+use FOS\RestBundle\Controller\Annotations\QueryParam;
+use FOS\RestBundle\Controller\Annotations\RequestParam;
+use FOS\RestBundle\Controller\Annotations\View;
+use FOS\RestBundle\Request\ParamFetcher;
 use KwcNewsletter\Bundle\Model\Categories;
+use KwcNewsletter\Bundle\Security\ApiUser;
+use KwfBundle\Validator\ErrorCollectValidator;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Validator\Constraints\Country;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\Ip;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use FOS\RestBundle\Request\ParamFetcher;
-use FOS\RestBundle\Controller\Annotations\RequestParam;
-use FOS\RestBundle\Controller\Annotations\QueryParam;
-use FOS\RestBundle\Controller\Annotations\View;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
-use KwfBundle\Validator\ErrorCollectValidator;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
-use KwcNewsletter\Bundle\Security\ApiUser;
 
 /**
  * @Route("/api/v1/open", service="kwc_newsletter.controller.open_api_categories")
  */
 class OpenApiCategoriesController extends Controller
 {
+    /* @var \Kwf_Component_Data */
+    protected $newsletterComponent;
+    /* @var ErrorCollectValidator */
+    protected $validator;
+    /* @var ApiUser */
+    protected $user;
     /**
      * @var Categories
      */
     private $model;
-
-    /* @var \Kwf_Component_Data */
-    protected $newsletterComponent;
-
-    /* @var ErrorCollectValidator */
-    protected $validator;
-
-    /* @var ApiUser */
-    protected $user;
 
     public function __construct(Categories $model, ErrorCollectValidator $validator, TokenStorage $tokenStorage)
     {
@@ -78,10 +76,15 @@ class OpenApiCategoriesController extends Controller
         $row = $this->model->createRow(array(
             'newsletter_component_id' => $this->newsletterComponent->dbId,
         ));
-        $this->updateRow($row, $paramFetcher);
+        $this->_updateRow($row, $paramFetcher);
         $row->save();
 
         return $row;
+    }
+
+    protected function _updateRow(\Kwf_Model_Row_Abstract $row, ParamFetcher $paramFetcher)
+    {
+        $row->category = $paramFetcher->get('category');
     }
 
     /**
@@ -103,7 +106,7 @@ class OpenApiCategoriesController extends Controller
             throw new NotFoundHttpException('Category not found');
         }
 
-        $this->updateRow($row, $paramFetcher);
+        $this->_updateRow($row, $paramFetcher);
 
         if ($row->isDirty()) {
             $row->save();
@@ -218,6 +221,14 @@ class OpenApiCategoriesController extends Controller
         return $ret;
     }
 
+    public function getUser()
+    {
+        if (!$this->user) {
+            throw new AccessDeniedHttpException('User not logged in');
+        }
+        return $this->user;
+    }
+
     /**
      * @Route("/categories/{id}/subscribers", requirements={"id"="[1-9]{1}\d*"})
      * @RequestParam(name="subscribers", requirements="[1-9]{1}\d*", strict=true, nullable=false, array=true)
@@ -308,18 +319,5 @@ class OpenApiCategoriesController extends Controller
         }
 
         return $row;
-    }
-
-    protected function updateRow(\Kwf_Model_Row_Abstract $row, ParamFetcher $paramFetcher)
-    {
-        $row->category = strtolower($paramFetcher->get('category'));
-    }
-
-    public function getUser()
-    {
-        if (!$this->user) {
-            throw new UnauthorizedHttpException('User not logged in');
-        }
-        return $this->user;
     }
 }

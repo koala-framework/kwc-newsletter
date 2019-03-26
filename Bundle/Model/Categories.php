@@ -1,10 +1,15 @@
 <?php
+
 namespace KwcNewsletter\Bundle\Model;
 
 class Categories extends \Kwf_Model_Db
 {
     protected $_table = 'kwc_newsletter_categories';
     protected $_toStringField = 'category';
+    protected $_serialization = array(
+        'id' => 'user',
+        'category' => 'user',
+    );
 
     protected function _init()
     {
@@ -35,9 +40,4 @@ class Categories extends \Kwf_Model_Db
         $filter->setGroupBy('newsletter_component_id');
         $this->_filters = array('pos' => $filter);
     }
-
-    protected $_serialization = array(
-        'id' => 'user',
-        'category' => 'user',
-    );
 }

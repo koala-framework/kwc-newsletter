@@ -1,50 +1,50 @@
 services:
-    kwc_newsletter.model.newsletters:
-        class:   KwcNewsletter\Bundle\Model\Newsletters
-        factory: ['Kwf_Model_Abstract', getInstance]
-        arguments: ['KwcNewsletter\Bundle\Model\Newsletters']
+  kwc_newsletter.model.newsletters:
+    class:   KwcNewsletter\Bundle\Model\Newsletters
+    factory: ['Kwf_Model_Abstract', getInstance]
+    arguments: ['KwcNewsletter\Bundle\Model\Newsletters']
 
-    kwc_newsletter.model.subscribers:
-            class:   KwcNewsletter\Bundle\Model\Subscribers
-            factory: ['Kwf_Model_Abstract', getInstance]
-            arguments: ['KwcNewsletter\Bundle\Model\Subscribers']
+  kwc_newsletter.model.subscribers:
+    class:   KwcNewsletter\Bundle\Model\Subscribers
+    factory: ['Kwf_Model_Abstract', getInstance]
+    arguments: ['KwcNewsletter\Bundle\Model\Subscribers']
 
-    kwc_newsletter.model.subscribers_to_categories:
-            class:   KwcNewsletter\Bundle\Model\SubscribersToCategories
-            factory: ['Kwf_Model_Abstract', getInstance]
-            arguments: ['KwcNewsletter\Bundle\Model\SubscribersToCategories']
+  kwc_newsletter.model.subscribers_to_categories:
+    class:   KwcNewsletter\Bundle\Model\SubscribersToCategories
+    factory: ['Kwf_Model_Abstract', getInstance]
+    arguments: ['KwcNewsletter\Bundle\Model\SubscribersToCategories']
 
-    kwc_newsletter.model.newsletter_subscriber_logs:
-            class:   KwcNewsletter\Bundle\Model\SubscriberLogs
-            factory: ['Kwf_Model_Abstract', getInstance]
-            arguments: ['KwcNewsletter\Bundle\Model\SubscriberLogs']
+  kwc_newsletter.model.newsletter_subscriber_logs:
+    class:   KwcNewsletter\Bundle\Model\SubscriberLogs
+    factory: ['Kwf_Model_Abstract', getInstance]
+    arguments: ['KwcNewsletter\Bundle\Model\SubscriberLogs']
 
-    kwc_newsletter.model.newsletter_queues:
-            class:   KwcNewsletter\Bundle\Model\NewsletterQueues
-            factory: ['Kwf_Model_Abstract', getInstance]
-            arguments: ['KwcNewsletter\Bundle\Model\NewsletterQueues']
+  kwc_newsletter.model.newsletter_queues:
+    class:   KwcNewsletter\Bundle\Model\NewsletterQueues
+    factory: ['Kwf_Model_Abstract', getInstance]
+    arguments: ['KwcNewsletter\Bundle\Model\NewsletterQueues']
 
-    kwc_newsletter.model.newsletter_queue_logs:
-            class:   KwcNewsletter\Bundle\Model\NewsletterQueueLogs
-            factory: ['Kwf_Model_Abstract', getInstance]
-            arguments: ['KwcNewsletter\Bundle\Model\NewsletterQueueLogs']
+  kwc_newsletter.model.newsletter_queue_logs:
+    class:   KwcNewsletter\Bundle\Model\NewsletterQueueLogs
+    factory: ['Kwf_Model_Abstract', getInstance]
+    arguments: ['KwcNewsletter\Bundle\Model\NewsletterQueueLogs']
 
-    kwc_newsletter.model.deleted_subscriber_hashes:
-            class:   KwcNewsletter\Bundle\Model\DeletedSubscriberHashes
-            factory: ['Kwf_Model_Abstract', getInstance]
-            arguments: ['KwcNewsletter\Bundle\Model\DeletedSubscriberHashes']
+  kwc_newsletter.model.deleted_subscriber_hashes:
+    class:   KwcNewsletter\Bundle\Model\DeletedSubscriberHashes
+    factory: ['Kwf_Model_Abstract', getInstance]
+    arguments: ['KwcNewsletter\Bundle\Model\DeletedSubscriberHashes']
 
-    kwc_newsletter.model.newsletter_runs:
-            class:   KwcNewsletter\Bundle\Model\NewsletterRuns
-            factory: ['Kwf_Model_Abstract', getInstance]
-            arguments: ['KwcNewsletter\Bundle\Model\NewsletterRuns']
+  kwc_newsletter.model.newsletter_runs:
+    class:   KwcNewsletter\Bundle\Model\NewsletterRuns
+    factory: ['Kwf_Model_Abstract', getInstance]
+    arguments: ['KwcNewsletter\Bundle\Model\NewsletterRuns']
 
-    kwc_newsletter.model.newsletter_api_keys:
-      class:   KwcNewsletter\Bundle\Model\NewsletterApiKeys
-      factory: ['Kwf_Model_Abstract', getInstance]
-      arguments: ['KwcNewsletter\Bundle\Model\NewsletterApiKeys']
+  kwc_newsletter.model.newsletter_api_keys:
+    class:   KwcNewsletter\Bundle\Model\NewsletterApiKeys
+    factory: ['Kwf_Model_Abstract', getInstance]
+    arguments: ['KwcNewsletter\Bundle\Model\NewsletterApiKeys']
 
-    kwc_newsletter.model.categories:
-      class:   KwcNewsletter\Bundle\Model\Categories
-      factory: ['Kwf_Model_Abstract', getInstance]
-      arguments: ['KwcNewsletter\Bundle\Model\Categories']
+  kwc_newsletter.model.categories:
+    class:   KwcNewsletter\Bundle\Model\Categories
+    factory: ['Kwf_Model_Abstract', getInstance]
+    arguments: ['KwcNewsletter\Bundle\Model\Categories']

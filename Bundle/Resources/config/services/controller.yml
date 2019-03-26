@@ -1,10 +1,10 @@
 services:
-    kwc_newsletter.controller.subscribers_api:
-        class: KwcNewsletter\Bundle\Controller\SubscribersApiController
-        arguments: [@kwc_newsletter.model.subscribers, "%kwc_newsletter.subscribers.require_country_param_for_api%"]
-    kwc_newsletter.controller.open_api_subscribers:
-        class: KwcNewsletter\Bundle\Controller\OpenApiSubscribersController
-        arguments: [@kwc_newsletter.model.subscribers, @kwf.validator.error_collect_validator, @security.token_storage]
-    kwc_newsletter.controller.open_api_categories:
-        class: KwcNewsletter\Bundle\Controller\OpenApiCategoriesController
-        arguments: [@kwc_newsletter.model.categories, @kwf.validator.error_collect_validator, @security.token_storage]
+  kwc_newsletter.controller.subscribers_api:
+    class: KwcNewsletter\Bundle\Controller\SubscribersApiController
+    arguments: [@kwc_newsletter.model.subscribers, "%kwc_newsletter.subscribers.require_country_param_for_api%"]
+  kwc_newsletter.controller.open_api_subscribers:
+    class: KwcNewsletter\Bundle\Controller\OpenApiSubscribersController
+    arguments: [@kwc_newsletter.model.subscribers, @kwf.validator.error_collect_validator, @security.token_storage]
+  kwc_newsletter.controller.open_api_categories:
+    class: KwcNewsletter\Bundle\Controller\OpenApiCategoriesController
+    arguments: [@kwc_newsletter.model.categories, @kwf.validator.error_collect_validator, @security.token_storage]

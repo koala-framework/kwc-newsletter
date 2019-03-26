@@ -3,7 +3,7 @@
 namespace KwcNewsletter\Bundle\Security;
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -68,6 +68,6 @@ class ApiKeyAuthenticator implements SimplePreAuthenticatorInterface, Authentica
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
-        throw new UnauthorizedHttpException('Invalid or empty API Key');
+        throw new AccessDeniedHttpException('Invalid or empty API Key');
     }
 }
