@@ -10,7 +10,8 @@ class KwcNewsletter_Controller_ApiKeyController extends Kwf_Controller_Action_Au
         parent::_initFields();
 
         $this->_form->add(new Kwf_Form_Field_TextField('name', trlKwf('Name')))
-            ->setAllowBlank(false);
+            ->setAllowBlank(false)
+            ->addValidator(new Kwf_Validate_Row_Unique());
 
         $newsletters = Kwf_Component_Data_Root::getInstance()->getComponentsByClass('KwcNewsletter_Kwc_Newsletter_Component');
         if (count($newsletters) > 1) {
