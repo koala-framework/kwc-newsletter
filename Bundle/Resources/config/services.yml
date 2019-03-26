@@ -11,3 +11,7 @@ services:
     api_key_user_provider:
         class: KwcNewsletter\Bundle\Security\ApiKeyUserProvider
         arguments: [@kwc_newsletter.model.newsletter_api_keys]
+    kwc_newsletter.updates_provider.updates_provider:
+        class: KwcNewsletter\Bundle\UpdatesProvider\UpdatesProvider
+        tags:
+            - { name: kwf.updates_provider }
