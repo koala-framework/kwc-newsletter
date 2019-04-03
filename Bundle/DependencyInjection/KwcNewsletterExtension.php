@@ -20,6 +20,7 @@ class KwcNewsletterExtension extends Extension
         $container->setParameter('kwc_newsletter.subscribers.delete_unsubscribed_after_days', $config['subscribers']['delete_unsubscribed_after_days']);
         $container->setParameter('kwc_newsletter.subscribers.delete_not_activated_after_days', $config['subscribers']['delete_not_activated_after_days']);
         $container->setParameter('kwc_newsletter.subscribers.require_country_param_for_api', $config['subscribers']['require_country_param_for_api']);
-    }
 
+        $container->setParameter('kwc_newsletter.open_api.categories.subscribers_limit', $config['open_api']['categories']['subscribers_limit']);
+    }
 }

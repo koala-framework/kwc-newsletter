@@ -1,51 +1,41 @@
 <?php
 
-namespace KwcNewsletter\Bundle\Controller;
+namespace KwcNewsletter\Bundle\Controller\OpenApi;
 
-use FOS\RestBundle\Controller\Annotations\QueryParam;
 use FOS\RestBundle\Controller\Annotations\RequestParam;
 use FOS\RestBundle\Controller\Annotations\View;
 use FOS\RestBundle\Request\ParamFetcher;
 use KwcNewsletter\Bundle\Model\Categories;
-use KwcNewsletter\Bundle\Security\ApiUser;
 use KwfBundle\Validator\ErrorCollectValidator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
-use Symfony\Component\Validator\Constraints\Country;
-use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\Ip;
 
 /**
- * @Route("/api/v1/open", service="kwc_newsletter.controller.open_api_categories")
+ * @Route("/api/v1/open", service="kwc_newsletter.controller.open_api.categories")
  */
-class OpenApiCategoriesController extends Controller
+class CategoriesController extends Controller
 {
-    /* @var \Kwf_Component_Data */
-    protected $newsletterComponent;
     /* @var ErrorCollectValidator */
     protected $validator;
-    /* @var ApiUser */
-    protected $user;
-    /**
-     * @var Categories
-     */
+    /* @var TokenStorage */
+    protected $tokenStorage;
+    /* @var integer */
+    protected $subscribersLimit;
+    /* @var Categories */
     private $model;
 
-    public function __construct(Categories $model, ErrorCollectValidator $validator, TokenStorage $tokenStorage)
+    public function __construct(Categories $model, ErrorCollectValidator $validator, TokenStorage $tokenStorage, $subscribersLimit)
     {
         $this->model = $model;
         $this->validator = $validator;
-        $this->user = $tokenStorage->getToken() && $tokenStorage->getToken()->getUser() != 'anon.' ?
-            $tokenStorage->getToken()->getUser() :
-            null;
-        $this->newsletterComponent = $this->user->getNewsletterComponent();
+        $this->tokenStorage = $tokenStorage;
+        $this->subscribersLimit = $subscribersLimit;
     }
 
     /**
@@ -58,7 +48,7 @@ class OpenApiCategoriesController extends Controller
         $this->validator->validateAndThrow($paramFetcher);
 
         $s = $this->model->select();
-        $s->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+        $s->whereEquals('newsletter_component_id', $this->tokenStorage->getToken()->getUser()->getNewsletterComponent()->dbId);
 
         return $this->model->getRows($s);
     }
@@ -74,15 +64,15 @@ class OpenApiCategoriesController extends Controller
         $this->validator->validateAndThrow($paramFetcher);
 
         $row = $this->model->createRow(array(
-            'newsletter_component_id' => $this->newsletterComponent->dbId,
+            'newsletter_component_id' => $this->tokenStorage->getToken()->getUser()->getNewsletterComponent()->dbId,
         ));
-        $this->_updateRow($row, $paramFetcher);
+        $this->updateRow($row, $paramFetcher);
         $row->save();
 
         return $row;
     }
 
-    protected function _updateRow(\Kwf_Model_Row_Abstract $row, ParamFetcher $paramFetcher)
+    protected function updateRow(\Kwf_Model_Row_Abstract $row, ParamFetcher $paramFetcher)
     {
         $row->category = $paramFetcher->get('category');
     }
@@ -97,16 +87,18 @@ class OpenApiCategoriesController extends Controller
     {
         $this->validator->validateAndThrow($paramFetcher);
 
+        $newsletterComponent = $this->tokenStorage->getToken()->getUser()->getNewsletterComponent();
+
         $s = $this->model->select();
         $s->whereEquals('id', $id);
-        $s->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+        $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
         $row = $this->model->getRow($s);
 
         if (!$row) {
-            throw new NotFoundHttpException('Category not found');
+            throw new NotFoundHttpException($newsletterComponent->trlKwf('Category not found'));
         }
 
-        $this->_updateRow($row, $paramFetcher);
+        $this->updateRow($row, $paramFetcher);
 
         if ($row->isDirty()) {
             $row->save();
@@ -124,13 +116,15 @@ class OpenApiCategoriesController extends Controller
     {
         $this->validator->validateAndThrow($paramFetcher);
 
+        $newsletterComponent = $this->tokenStorage->getToken()->getUser()->getNewsletterComponent();
+
         $s = $this->model->select();
         $s->whereEquals('id', $id);
-        $s->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+        $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
         $row = $this->model->getRow($s);
 
         if (!$row) {
-            throw new NotFoundHttpException('Category not found');
+            throw new NotFoundHttpException($newsletterComponent->trlKwf('Category not found'));
         }
 
         // find subscribers
@@ -154,17 +148,30 @@ class OpenApiCategoriesController extends Controller
     {
         $this->validator->validateAndThrow($paramFetcher);
 
-        $s = $this->model->select();
-        $s->whereEquals('id', $id);
-        $s->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
-        $row = $this->model->getRow($s);
-
-        if (!$row) {
-            throw new NotFoundHttpException('Category not found');
-        }
+        $user = $this->tokenStorage->getToken()->getUser();
+        $newsletterComponent = $user->getNewsletterComponent();
 
         // new subscribers from request
         $subscribers = $paramFetcher->get('subscribers');
+
+        // check limit
+        if ($this->subscribersLimit < ($subscribersCount = count($subscribers))) {
+            throw new BadRequestHttpException(
+                $newsletterComponent->trlKwf(
+                    'Too many subscribers ({0}) only {1} allowed in one request.',
+                    array($subscribersCount, $this->subscribersLimit)
+                )
+            );
+        }
+
+        $s = $this->model->select();
+        $s->whereEquals('id', $id);
+        $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
+        $row = $this->model->getRow($s);
+
+        if (!$row) {
+            throw new NotFoundHttpException($newsletterComponent->trlKwf('Category not found'));
+        }
 
         // statistics
         $ret = array(
@@ -186,7 +193,7 @@ class OpenApiCategoriesController extends Controller
         // find subscribers in the database
         $s = $subscribersModel->select();
         $s->whereEquals('id', $subscribers);
-        $s->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+        $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
         $subscriberRows = $subscribersModel->getRows($s);
 
         // subscribers in the category
@@ -206,7 +213,9 @@ class OpenApiCategoriesController extends Controller
                 $subscriber->setLogSource(
                     ($source = $paramFetcher->get('source')) ?
                         $source :
-                        trlKwf('Subscribe Open API. API Key: {0}', array($this->getUser()->getUsername())
+                        $newsletterComponent->trlKwf(
+                            'Subscribe Open API. API Key: {0}',
+                            array($user->getUsername())
                         ));
                 $subscriber->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
 
@@ -221,14 +230,6 @@ class OpenApiCategoriesController extends Controller
         return $ret;
     }
 
-    public function getUser()
-    {
-        if (!$this->user) {
-            throw new AccessDeniedHttpException('User not logged in');
-        }
-        return $this->user;
-    }
-
     /**
      * @Route("/categories/{id}/subscribers", requirements={"id"="[1-9]{1}\d*"})
      * @RequestParam(name="subscribers", requirements="[1-9]{1}\d*", strict=true, nullable=false, array=true)
@@ -241,17 +242,30 @@ class OpenApiCategoriesController extends Controller
     {
         $this->validator->validateAndThrow($paramFetcher);
 
-        $s = $this->model->select();
-        $s->whereEquals('id', $id);
-        $s->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
-        $row = $this->model->getRow($s);
-
-        if (!$row) {
-            throw new NotFoundHttpException('Category not found');
-        }
+        $user = $this->tokenStorage->getToken()->getUser();
+        $newsletterComponent = $user->getNewsletterComponent();
 
         // subscribers to delete from request
         $subscribers = $paramFetcher->get('subscribers');
+
+        // check limit
+        if ($this->subscribersLimit < ($subscribersCount = count($subscribers))) {
+            throw new BadRequestHttpException(
+                $newsletterComponent->trlKwf(
+                    'Too many subscribers ({0}) only {1} allowed in one request.',
+                    array($subscribersCount, $this->subscribersLimit)
+                )
+            );
+        }
+
+        $s = $this->model->select();
+        $s->whereEquals('id', $id);
+        $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
+        $row = $this->model->getRow($s);
+
+        if (!$row) {
+            throw new NotFoundHttpException($newsletterComponent->trlKwf('Category not found'));
+        }
 
         // statistics
         $ret = array(
@@ -272,13 +286,15 @@ class OpenApiCategoriesController extends Controller
         // find subscribers because of log source
         $s = $subscribersModel->select();
         $s->whereEquals('id', $subscribers);
-        $s->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+        $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
         $subscriberRows = $subscribersModel->getRows($s);
         foreach ($subscriberRows as $subscriber) {
             $subscriber->setLogSource(
                 ($source = $paramFetcher->get('source')) ?
                     $source :
-                    trlKwf('Subscribe Open API. API Key: {0}', array($this->getUser()->getUsername())
+                    $newsletterComponent->trlKwf(
+                        'Subscribe Open API. API Key: {0}',
+                        array($user->getUsername())
                     ));
             $subscriber->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
         }
@@ -309,13 +325,15 @@ class OpenApiCategoriesController extends Controller
     {
         $this->validator->validateAndThrow($paramFetcher);
 
+        $newletterComponent = $this->tokenStorage->getToken()->getUser()->getNewsletterComponent();
+
         $s = $this->model->select();
         $s->whereEquals('id', $id);
-        $s->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+        $s->whereEquals('newsletter_component_id', $newletterComponent->dbId);
         $row = $this->model->getRow($s);
 
         if (!$row) {
-            throw new NotFoundHttpException('Category not found');
+            throw new NotFoundHttpException($newletterComponent->trlKwf('Category not found'));
         }
 
         return $row;

@@ -1,17 +1,16 @@
 <?php
 
-namespace KwcNewsletter\Bundle\Controller;
+namespace KwcNewsletter\Bundle\Controller\OpenApi;
 
+use KwcNewsletter\Bundle\Controller\SubscribersApiController;
 use FOS\RestBundle\Controller\Annotations\QueryParam;
 use FOS\RestBundle\Controller\Annotations\RequestParam;
 use FOS\RestBundle\Controller\Annotations\View;
 use FOS\RestBundle\Request\ParamFetcher;
 use KwcNewsletter\Bundle\Model\Subscribers;
-use KwcNewsletter\Bundle\Security\ApiUser;
 use KwfBundle\Validator\ErrorCollectValidator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -23,29 +22,22 @@ use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\Ip;
 
 /**
- * @Route("/api/v1/open", service="kwc_newsletter.controller.open_api_subscribers")
+ * @Route("/api/v1/open", service="kwc_newsletter.controller.open_api.subscribers")
  */
-class OpenApiSubscribersController extends Controller
+class SubscribersController extends SubscribersApiController
 {
     /* @var ErrorCollectValidator */
     protected $validator;
-    /* @var \Kwf_Component_Data */
-    protected $newsletterComponent;
-    /* @var ApiUser */
-    protected $user;
-    /**
-     * @var Subscribers
-     */
-    private $model;
+    /* @var TokenStorage */
+    protected $tokenStorage;
+    /* @var Subscribers */
+    protected $model;
 
     public function __construct(Subscribers $model, ErrorCollectValidator $validator, TokenStorage $tokenStorage)
     {
         $this->model = $model;
         $this->validator = $validator;
-        $this->user = $tokenStorage->getToken() && $tokenStorage->getToken()->getUser() != 'anon.' ?
-            $tokenStorage->getToken()->getUser() :
-            null;
-        $this->newsletterComponent = $this->user->getNewsletterComponent();
+        $this->tokenStorage = $tokenStorage;
     }
 
     /**
@@ -59,13 +51,15 @@ class OpenApiSubscribersController extends Controller
         $this->validator->validateAndThrow($paramFetcher);
         $email = $paramFetcher->get('email');
 
+        $newsletterComponent = $this->tokenStorage->getToken()->getUser()->getNewsletterComponent();
+
         $s = $this->model->select();
-        $s->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+        $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
         $s->whereEquals('email', $email);
         $rows = $this->model->getRows($s);
 
         if (!count($rows)) {
-            throw new NotFoundHttpException('Subscriber not found');
+            throw new NotFoundHttpException($newsletterComponent->trlKwf('Subscriber not found'));
         }
 
         return $rows;
@@ -86,24 +80,27 @@ class OpenApiSubscribersController extends Controller
     {
         $this->validator->validateAndThrow($paramFetcher);
 
+        $user = $this->tokenStorage->getToken()->getUser();
+        $newsletterComponent = $user->getNewsletterComponent();
+
         $s = $this->model->select();
-        $s->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+        $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
         $s->whereEquals('id', $id);
         $row = $this->model->getRow($s);
 
         if (!$row) {
-            throw new NotFoundHttpException('Subscriber not found');
+            throw new NotFoundHttpException($newsletterComponent->trlKwf('Subscriber not found'));
         }
 
-        $this->_updateRow($row, $paramFetcher);
+        $this->updateRow($row, $paramFetcher);
 
         $row->setLogSource(
             ($source = $paramFetcher->get('source')) ?
                 $source :
-                trlKwf('Subscribe Open API. API Key: {0}', array($this->getUser()->getUsername())
+                $user->getNewsletterComponent()->trlKwf('Subscribe Open API. API Key: {0}', array($user->getUsername())
                 ));
         $row->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
-        $row->writeLog(trlKwf('Updated'));
+        $row->writeLog($user->getNewsletterComponent()->trlKwf('Updated'));
 
         if ($row->isDirty()) {
             $row->save();
@@ -112,20 +109,12 @@ class OpenApiSubscribersController extends Controller
         return $row;
     }
 
-    protected function _updateRow(\Kwf_Model_Row_Abstract $row, ParamFetcher $paramFetcher)
+    protected function updateRow(\Kwf_Model_Row_Abstract $row, ParamFetcher $paramFetcher)
     {
         $row->gender = strtolower($paramFetcher->get('gender'));
         $row->title = ($title = $paramFetcher->get('title')) ? $title : '';
         $row->firstname = $paramFetcher->get('firstname');
         $row->lastname = $paramFetcher->get('lastname');
-    }
-
-    public function getUser()
-    {
-        if (!$this->user) {
-            throw new AccessDeniedHttpException('No authenticated user found');
-        }
-        return $this->user;
     }
 
     /**
@@ -138,28 +127,31 @@ class OpenApiSubscribersController extends Controller
     {
         $this->validator->validateAndThrow($paramFetcher);
 
+        $user = $this->tokenStorage->getToken()->getUser();
+        $newsletterComponent = $user->getNewsletterComponent();
+
         $s = $this->model->select();
-        $s->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+        $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
         $s->whereEquals('id', $id);
         $row = $this->model->getRow($s);
 
         if (!$row) {
-            throw new NotFoundHttpException('Subscriber not found');
+            throw new NotFoundHttpException($newsletterComponent->trlKwf('Subscriber not found'));
         }
 
         // already unsubscribed
         if ($row->unsubscribed) {
-            throw new UnprocessableEntityHttpException('Subscriber already unsunscribed');
+            throw new UnprocessableEntityHttpException($newsletterComponent->trlKwf('Subscriber already unsunscribed'));
         }
 
         // unsubscribe and log
         $row->setLogSource(
             ($source = $paramFetcher->get('source')) ?
                 $source :
-                trlKwf('Subscribe Open API. API Key: {0}', array($this->getUser()->getUsername())
+                $user->getNewsletterComponent()->trlKwf('Subscribe Open API. API Key: {0}', array($user->getUsername())
                 ));
         $row->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
-        $row->writeLog(trlKwf('Unsubscribed'), 'unsubscribed');
+        $row->writeLog($user->getNewsletterComponent()->trlKwf('Unsubscribed'), 'unsubscribed');
 
         $row->unsubscribed = true;
         $row->save();
@@ -184,49 +176,25 @@ class OpenApiSubscribersController extends Controller
      */
     public function postSubscribeAction(ParamFetcher $paramFetcher, Request $request)
     {
-        $this->validator->validateAndThrow($paramFetcher);
-
+        $user = $this->tokenStorage->getToken()->getUser();
+        $newsletterComponent = $user->getNewsletterComponent();
         $doubleOptIn = $paramFetcher->get('doubleOptIn');
 
+        // call parent insert with our parameters
+        parent::postAction(
+            $paramFetcher,
+            $request,
+            $doubleOptIn,
+            $newsletterComponent,
+            $newsletterComponent->trlKwf('Subscribe Open API. API Key: {0}', array($user->getUsername()))
+        );
+
+        // handle categories
         $email = $paramFetcher->get('email');
-        $s = $this->model->select();
-        $s->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+        $s = new \Kwf_Model_Select();
+        $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
         $s->whereEquals('email', $email);
         $row = $this->model->getRow($s);
-        if (!$row) {
-            $row = $this->model->createRow(array(
-                'newsletter_component_id' => $this->newsletterComponent->dbId,
-                'email' => $email,
-            ));
-        }
-
-        // activate it immediately
-        if (!$doubleOptIn) {
-            $row->activated = true;
-        }
-
-        // fetch optional parameters
-        $this->_updateRow($row, $paramFetcher);
-
-        $row->setLogSource(
-            ($source = $paramFetcher->get('source')) ?
-                $source :
-                trlKwf('Subscribe Open API. API Key: {0}', array($this->getUser()->getUsername())
-                ));
-        $row->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
-
-        $sendActivationMail = false;
-        if ($row->activated) {
-            $row->writeLog(trlKwf('Subscribed and activated'), 'subscribed');
-            $row->writeLog(trlKwf('Subscribed and activated'), 'activated');
-        } elseif (!$row->activated || $row->unsubscribed) {
-            $row->writeLog(trlKwf('Subscribed'), 'subscribed');
-
-            $row->unsubscribed = false;
-            $row->activated = false;
-
-            $sendActivationMail = true;
-        }
 
         // statistics
         $categoriesRet = array(
@@ -250,7 +218,7 @@ class OpenApiSubscribersController extends Controller
             foreach ($categories as $categoryId) {
                 $s = $categoriesModel->select();
                 $s->whereEquals('id', $categoryId);
-                $s->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+                $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
                 $categoryRow = $categoriesModel->getRow($s);
 
                 if ($categoryRow) {
@@ -270,37 +238,9 @@ class OpenApiSubscribersController extends Controller
             }
         }
 
-        if ($row->isDirty()) $row->save();
-
-        $sendOneActivationMailForEmailPerHourCacheId = 'send-one-activation-mail-for-email-per-hour-' . md5($email);
-        $sendOneActivationMailForEmailPerHour = \Kwf_Cache_Simple::fetch($sendOneActivationMailForEmailPerHourCacheId);
-        if (!$sendOneActivationMailForEmailPerHour && $sendActivationMail) {
-            $this->_sendActivationMail($this->newsletterComponent, $row);
-
-            \Kwf_Cache_Simple::add($sendOneActivationMailForEmailPerHourCacheId, true, 3600);
-        }
-
         return array(
-            'message' => trlKwf(
-                $doubleOptIn ?
-                    'Thank you for your subscription. If you have not been added to our newsletter-distributor yet, you will shortly receive an email with your activation link. Please click on the link to confirm your subscription.' :
-                    'Thank you for your subscription, it was successfully activated.'
-            ),
+            'message' => $this->getMessage($newsletterComponent, $doubleOptIn),
             'categories' => $categoriesRet,
         );
-    }
-
-    protected function _sendActivationMail(\Kwf_Component_Data $newsletterComponent, \Kwc_Mail_Recipient_Interface $row)
-    {
-        $subscribe = \Kwf_Component_Data_Root::getInstance()->getComponentByClass(
-            'KwcNewsletter_Kwc_Newsletter_Subscribe_Component', array('subroot' => $newsletterComponent->getSubroot(), 'limit' => 1)
-        );
-        $subscribe->getChildComponent('_mail')->getComponent()->send($row, array(
-            'formRow' => $row,
-            'host' => $newsletterComponent->getDomain(),
-            'unsubscribeComponent' => null,
-            'editComponent' => $newsletterComponent->getChildComponent('_editSubscriber'),
-            'doubleOptInComponent' => $subscribe->getChildComponent('_doubleOptIn')
-        ));
     }
 }
