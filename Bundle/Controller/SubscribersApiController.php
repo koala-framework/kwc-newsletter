@@ -21,7 +21,7 @@ class SubscribersApiController extends Controller
     /**
      * @var Subscribers
      */
-    private $model;
+    protected $model;
     /**
      * @var boolean
      */
@@ -46,11 +46,13 @@ class SubscribersApiController extends Controller
      * @RequestParam(name="source", strict=true, nullable=true)
      * @RequestParam(name="ip", requirements=@Ip, strict=true, nullable=true)
      */
-    public function postAction(ParamFetcher $paramFetcher, Request $request)
+    public function postAction(ParamFetcher $paramFetcher, Request $request, $doubleOptIn=true, $subroot=null, $logSource=null)
     {
-        $root = \Kwf_Component_Data_Root::getInstance();
-        $subroot = ($country = $this->getCountry($paramFetcher)) ? $root->getComponentById('root-' . strtolower($country)) : $root;
-        if (!$subroot) throw new \Kwf_Exception('Subroot not found');
+        if (!$subroot) {
+            $root = \Kwf_Component_Data_Root::getInstance();
+            $subroot = ($country = $this->getCountry($paramFetcher)) ? $root->getComponentById('root-' . strtolower($country)) : $root;
+            if (!$subroot) throw new \Kwf_Exception('Subroot not found');
+        }
         $newsletterComponent = \Kwf_Component_Data_Root::getInstance()->getComponentByClass(
             'KwcNewsletter_Kwc_Newsletter_Component', array('subroot' => $subroot)
         );
@@ -67,13 +69,21 @@ class SubscribersApiController extends Controller
             ));
         }
 
+        // activate it immediately
+        if (!$doubleOptIn) {
+            $row->activated = true;
+        }
+
         $this->updateRow($row, $paramFetcher);
 
-        $row->setLogSource(($source = $paramFetcher->get('source')) ? $source : $subroot->trlKwf('Subscribe API'));
+        $row->setLogSource(($source = $paramFetcher->get('source')) ? $source : ($logSource ? $logSource : $subroot->trlKwf('Subscribe API')));
         $row->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
 
         $sendActivationMail = false;
-        if (!$row->activated || $row->unsubscribed) {
+        if ($row->activated) {
+            $row->writeLog($subroot->trlKwf('Subscribed and activated'), 'subscribed');
+            $row->writeLog($subroot->trlKwf('Subscribed and activated'), 'activated');
+        } elseif (!$row->activated || $row->unsubscribed) {
             $row->writeLog($subroot->trlKwf('Subscribed'), 'subscribed');
 
             $row->unsubscribed = false;
@@ -98,12 +108,11 @@ class SubscribersApiController extends Controller
         $sendOneActivationMailForEmailPerHour = \Kwf_Cache_Simple::fetch($sendOneActivationMailForEmailPerHourCacheId);
         if (!$sendOneActivationMailForEmailPerHour && $sendActivationMail) {
             $this->sendActivationMail($newsletterComponent, $row);
-
             \Kwf_Cache_Simple::add($sendOneActivationMailForEmailPerHourCacheId, true, 3600);
         }
 
         return new JsonResponse(array(
-            'message' => $this->getMessage($subroot)
+            'message' => $this->getMessage($subroot, $doubleOptIn)
         ), JsonResponse::HTTP_OK);
     }
 
@@ -124,10 +133,12 @@ class SubscribersApiController extends Controller
         return $ret;
     }
 
-    protected function getMessage(\Kwf_Component_Data $subroot)
+    protected function getMessage(\Kwf_Component_Data $subroot, $doubleOptIn=true)
     {
         return $subroot->trlKwf(
-            'Thank you for your subscription. If you have not been added to our newsletter-distributor yet, you will shortly receive an email with your activation link. Please click on the link to confirm your subscription.'
+            $doubleOptIn ?
+            'Thank you for your subscription. If you have not been added to our newsletter-distributor yet, you will shortly receive an email with your activation link. Please click on the link to confirm your subscription.' :
+            'Thank you for your subscription, it was successfully activated.'
         );
     }
 

@@ -1,9 +1,9 @@
 kwc_newsletter.subscribers_api:
     resource: "@KwcNewsletterBundle/Controller/SubscribersApiController.php"
     type: annotation
-kwc_newsletter.open_api_subscribers:
-    resource: "@KwcNewsletterBundle/Controller/OpenApiSubscribersController.php"
+kwc_newsletter.open_api.subscribers:
+    resource: "@KwcNewsletterBundle/Controller/OpenApi/SubscribersController.php"
     type: annotation
-kwc_newsletter.open_api_categories:
-    resource: "@KwcNewsletterBundle/Controller/OpenApiCategoriesController.php"
+kwc_newsletter.open_api.categories:
+    resource: "@KwcNewsletterBundle/Controller/OpenApi/CategoriesController.php"
     type: annotation
