@@ -118,7 +118,7 @@ class SubscribersController extends SubscribersApiController
     }
 
     /**
-     * @Route("/subscribers/unsubscribe/{id}", requirements={"id"="[1-9]{1}\d*"})
+     * @Route("/subscribers/{id}/unsubscribe", requirements={"id"="[1-9]{1}\d*"})
      * @RequestParam(name="source", strict=true, nullable=true)
      * @RequestParam(name="ip", requirements=@Ip, strict=true, nullable=true)
      * @Method("PUT")

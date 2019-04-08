@@ -137,7 +137,7 @@ class CategoriesController extends Controller
     }
 
     /**
-     * @Route("/categories/{id}/subscribers", requirements={"id"="[1-9]{1}\d*"})
+     * @Route("/categories/{id}/add-subscribers", requirements={"id"="[1-9]{1}\d*"})
      * @RequestParam(name="subscribers", requirements="[1-9]{1}\d*", strict=true, nullable=false, array=true)
      * @RequestParam(name="source", strict=true, nullable=true)
      * @RequestParam(name="ip", requirements=@Ip, strict=true, nullable=true)
@@ -231,11 +231,11 @@ class CategoriesController extends Controller
     }
 
     /**
-     * @Route("/categories/{id}/subscribers", requirements={"id"="[1-9]{1}\d*"})
+     * @Route("/categories/{id}/delete-subscribers", requirements={"id"="[1-9]{1}\d*"})
      * @RequestParam(name="subscribers", requirements="[1-9]{1}\d*", strict=true, nullable=false, array=true)
      * @RequestParam(name="source", strict=true, nullable=true)
      * @RequestParam(name="ip", requirements=@Ip, strict=true, nullable=true)
-     * @Method("DELETE")
+     * @Method("POST")
      * @View(serializerGroups={"user"})
      */
     public function deleteCategorySubscribersAction($id, ParamFetcher $paramFetcher, Request $request)
