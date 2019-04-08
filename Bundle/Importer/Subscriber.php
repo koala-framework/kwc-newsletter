@@ -26,6 +26,10 @@ class Subscriber
      */
     protected $newsletterComponent;
     /**
+     * @var string
+     */
+    protected $newsletterSource;
+    /**
      * @var integer
      */
     protected $categoryId;
@@ -38,7 +42,7 @@ class Subscriber
      */
     protected $options = array();
 
-    public function __construct(Subscribers $model, $newsletterComponentId, $logSource, $categoryId = null, array $options = array())
+    public function __construct(Subscribers $model, $newsletterComponentId, $newsletterSource, $logSource, $categoryId = null, array $options = array())
     {
         $this->subscribersModel = $model;
         $this->subscribersToCategoriesModel = $this->subscribersModel->getDependentModel('ToCategories');
@@ -49,6 +53,7 @@ class Subscriber
             throw new Exception("Newsletter component with id \"{$newsletterComponentId}\" not found");
         }
         $this->newsletterComponent = $component;
+        $this->newsletterSource = $newsletterSource;
         $this->logSource = $logSource;
 
         if (!$this->categoriesModel->countRows($this->getCategorySelect($categoryId))) {
@@ -131,6 +136,7 @@ class Subscriber
         $select = new \Kwf_Model_Select();
         $select->whereId($categoryId);
         $select->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+        $select->whereEquals('newsletter_source', $this->newsletterSource);
         return $select;
     }
 
@@ -138,6 +144,7 @@ class Subscriber
     {
         $select = $this->subscribersModel->select();
         $select->whereEquals('newsletter_component_id', $this->newsletterComponent->dbId);
+        $select->whereEquals('newsletter_source', $this->newsletterSource);
         $select->whereEquals('email', $data['email']);
         return $select;
     }
@@ -146,6 +153,7 @@ class Subscriber
     {
         return array(
             'newsletter_component_id' => $this->newsletterComponent->dbId,
+            'newsletter_source' => $this->newsletterSource,
             'email' => $data['email'],
             'format' => 'html',
             'unsubscribed' => false,

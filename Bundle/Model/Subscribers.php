@@ -1,8 +1,11 @@
 <?php
 namespace KwcNewsletter\Bundle\Model;
 
+use \Kwf_Component_Data;
+
 class Subscribers extends \Kwf_Model_Db
 {
+    const DEFAULT_NEWSLETTER_SOURCE = 'newsletter';
     protected $_table = 'kwc_newsletter_subscribers';
     protected $_rowClass = 'KwcNewsletter\Bundle\Model\Row\Subscribers';
 
@@ -43,5 +46,16 @@ class Subscribers extends \Kwf_Model_Db
         $this->_exprs['last_unsubscribe_date'] = new \Kwf_Model_Select_Expr_Child_First('Logs', 'date', $select);
 
         $this->_exprs['category_ids'] = new \Kwf_Model_Select_Expr_Child_GroupConcat('ToCategories', 'category_id');
+    }
+
+    public static function getSources(Kwf_Component_Data $newsletterComponent)
+    {
+        $ret = $newsletterComponent->getBaseProperty('newsletterSources');
+        if (!$ret) {
+            $ret = array(
+                self::DEFAULT_NEWSLETTER_SOURCE => $newsletterComponent->trlKwf('Newsletter')
+            );
+        }
+        return $ret;
     }
 }

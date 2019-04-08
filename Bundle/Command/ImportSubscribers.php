@@ -41,6 +41,10 @@ class ImportSubscribers extends Command
     /**
      * @var string
      */
+    protected $newsletterSource;
+    /**
+     * @var string
+     */
     protected $logSource;
     /**
      * @var integer
@@ -86,6 +90,12 @@ class ImportSubscribers extends Command
                 'Newsletter component ID where subscribers should be imported'
             )
             ->addOption(
+                'newsletterSource',
+                'ns',
+                InputOption::VALUE_OPTIONAL,
+                'Newsletter source where subscribers should be imported'
+            )
+            ->addOption(
                 'source',
                 'so',
                 InputOption::VALUE_OPTIONAL,
@@ -117,6 +127,7 @@ class ImportSubscribers extends Command
 
         $this->file = $input->getOption('file');
         $this->newsletterComponentId = $input->getOption('newsletterComponentId');
+        $this->newsletterSource = $input->getOption('newsletterSource');
         $this->categoryId = $input->getOption('categoryId');
         $this->logSource = $input->getOption('source');
         $this->ignoreDoubleOptIn = $input->getOption('ignoreDoubleOptIn');
@@ -152,6 +163,7 @@ class ImportSubscribers extends Command
     {
         return $this->subscriberFactory->create(
             $this->newsletterComponentId,
+            $this->newsletterSource,
             $this->logSource,
             $this->categoryId,
             array(
@@ -173,6 +185,11 @@ class ImportSubscribers extends Command
         if (!$input->getOption('newsletterComponentId')) {
             $question = new Question('Please enter the newsletter component id where subscribers should be imported: ');
             $this->newsletterComponentId = $helper->ask($input, $output, $question);
+        }
+
+        if (!$input->getOption('newsletterSource')) {
+            $question = new Question('Please enter the newsletter source where subscribers should be imported: ');
+            $this->newsletterSource = $helper->ask($input, $output, $question);
         }
 
         if (!$input->getOption('categoryId')) {

@@ -2,6 +2,7 @@
 namespace KwcNewsletter\Bundle\Command;
 
 use KwcNewsletter\Bundle\Model\Newsletters;
+use KwcNewsletter\Bundle\Model\Subscribers;
 use KwcNewsletter\Bundle\Model\SubscribersToCategories;
 use KwcNewsletter\Bundle\Model\SubscriberLogs;
 
@@ -49,6 +50,12 @@ class CombineCategorySubscribers extends Command
                 'nc',
                 InputOption::VALUE_REQUIRED,
                 'Newsletter component ID where the subscribers category should be changed'
+            )
+            ->addOption(
+                'newsletterSource',
+                'ns',
+                InputOption::VALUE_REQUIRED,
+                'Newsletter source where the subscribers category should be changed'
             )
             ->addOption(
                 'sourceCategoryIds',
@@ -123,7 +130,7 @@ class CombineCategorySubscribers extends Command
             throw new RuntimeException("There is no newsletter with the component-id \"{$input->getOption('newsletterComponentId')}\"");
         }
 
-        $this->validateCategory($input->getOption('targetCategoryId'), $input->getOption('newsletterComponentId'));
+        $this->validateCategory($input->getOption('targetCategoryId'), $input->getOption('newsletterComponentId'), $input->getOption('newsletterSource'));
 
         $categoryNames = array(
             $input->getOption('targetCategoryId') => $categoriesModel->getRow($input->getOption('targetCategoryId'))->category
@@ -131,7 +138,7 @@ class CombineCategorySubscribers extends Command
 
         $sourceCategoryIds = array_map('trim', explode(',', $input->getOption('sourceCategoryIds')));
         foreach ($sourceCategoryIds as $categoryId) {
-            $this->validateCategory($categoryId, $input->getOption('newsletterComponentId'));
+            $this->validateCategory($categoryId, $input->getOption('newsletterComponentId'), $input->getOption('newsletterSource'));
             $categoryNames[$categoryId] = $categoriesModel->getRow($categoryId)->category;
         }
 
@@ -140,6 +147,7 @@ class CombineCategorySubscribers extends Command
 
         $subscriberSelect = new \Kwf_Model_Select();
         $subscriberSelect->whereEquals('newsletter_component_id', $input->getOption('newsletterComponentId'));
+        $subscriberSelect->whereEquals('newsletter_source', $input->getOption('newsletterSource'));
         $subscriberSelect->where(
             new \Kwf_Model_Select_Expr_Child_Contains('ToCategories', $categorySelect)
         );
@@ -197,12 +205,13 @@ class CombineCategorySubscribers extends Command
         \Kwf_Registry::get('db')->commit();
     }
 
-    protected function validateCategory($id, $componentId)
+    protected function validateCategory($id, $componentId, $newsletterSource)
     {
         $categoriesModel = $this->subscribersToCategories->getReferencedModel('Category');
         $select = new \Kwf_Model_Select();
         $select->whereId($id);
         $select->whereEquals('newsletter_component_id', $componentId);
+        $select->whereEquals('newsletter_source', $newsletterSource);
 
         if (!$categoriesModel->countRows($select)) {
             throw new RuntimeException("There is no category with id \"$id\" in \"$componentId\"");

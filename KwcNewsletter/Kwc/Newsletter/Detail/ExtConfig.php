@@ -1,4 +1,6 @@
 <?php
+use \KwcNewsletter\Bundle\Model\Subscribers;
+
 class KwcNewsletter_Kwc_Newsletter_Detail_ExtConfig extends Kwf_Component_Abstract_ExtConfig_Form
 {
     protected function _getConfig()
@@ -49,9 +51,10 @@ class KwcNewsletter_Kwc_Newsletter_Detail_ExtConfig extends Kwf_Component_Abstra
                     'title'                 => trlKwf('Mailing'),
                     'recipientsPanel' => array(
                         'title' => trlKwf('Add/Remove Subscriber to Queue'),
-                        'controllerUrl' => $this->getControllerUrl('Recipients'),
                         'region' => 'center',
-                        'xtype' => 'kwc.newsletter.recipients.grid'
+                        'xtype' => 'kwf.tabpanel',
+                        'activeTab' => 0,
+                        'tabs' => $this->_getRecipientPanelTabs()
                     ),
                     'recipientsQueuePanel' => array(
                         'title' => trlKwf('Queue'),
@@ -108,5 +111,24 @@ class KwcNewsletter_Kwc_Newsletter_Detail_ExtConfig extends Kwf_Component_Abstra
             }
         }
         return $recipientSources;
+    }
+
+    protected function _getRecipientPanelTabs()
+    {
+        $newsletterComponent = Kwf_Component_Data_Root::getInstance()
+            ->getComponentByDbId($_REQUEST['componentId'], array('ignoreVisible' => true));
+
+        $ret = array();
+        foreach (Subscribers::getSources($newsletterComponent) as $newsletterSourceId => $newsletterSourceName) {
+            $ret[$newsletterSourceId] = array(
+                'title' => $newsletterSourceName,
+                'controllerUrl' => $this->getControllerUrl('Recipients'),
+                'xtype' => 'kwc.newsletter.recipients.grid',
+                'baseParams' => array(
+                    'newsletterSource' => $newsletterSourceId
+                )
+            );
+        }
+        return $ret;
     }
 }

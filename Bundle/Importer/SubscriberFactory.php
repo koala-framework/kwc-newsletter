@@ -20,8 +20,8 @@ class SubscriberFactory
         $this->subscriberClass = $subscriberClass;
     }
 
-    public function create($newsletterComponentId, $logSource, $categoryId = null, array $options = array())
+    public function create($newsletterComponentId, $newsletterSource, $logSource, $categoryId = null, array $options = array())
     {
-        return new $this->subscriberClass($this->model, $newsletterComponentId, $logSource, $categoryId, $options);
+        return new $this->subscriberClass($this->model, $newsletterComponentId, $newsletterSource, $logSource, $categoryId, $options);
     }
 }

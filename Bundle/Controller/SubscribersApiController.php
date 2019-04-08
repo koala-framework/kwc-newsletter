@@ -45,6 +45,7 @@ class SubscribersApiController extends Controller
      * @RequestParam(name="categoryId", requirements="\d+", strict=true, nullable=true)
      * @RequestParam(name="source", strict=true, nullable=true)
      * @RequestParam(name="ip", requirements=@Ip, strict=true, nullable=true)
+     * @RequestParam(name="newsletterSource", strict=true, default=Subscribers::DEFAULT_NEWSLETTER_SOURCE)
      */
     public function postAction(ParamFetcher $paramFetcher, Request $request)
     {
@@ -55,14 +56,17 @@ class SubscribersApiController extends Controller
             'KwcNewsletter_Kwc_Newsletter_Component', array('subroot' => $subroot)
         );
 
+        $newsletterSource = $paramFetcher->get('newsletterSource');
         $email = $paramFetcher->get('email');
         $s = new \Kwf_Model_Select();
         $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
+        $s->whereEquals('newsletter_source', $newsletterSource);
         $s->whereEquals('email', $email);
         $row = $this->model->getRow($s);
         if (!$row) {
             $row = $this->model->createRow(array(
                 'newsletter_component_id' => $newsletterComponent->dbId,
+                'newsletter_source' => $newsletterSource,
                 'email' => $email
             ));
         }
@@ -94,7 +98,7 @@ class SubscribersApiController extends Controller
 
         if ($row->isDirty()) $row->save();
 
-        $sendOneActivationMailForEmailPerHourCacheId = 'send-one-activation-mail-for-email-per-hour-' . md5($email);
+        $sendOneActivationMailForEmailPerHourCacheId = 'send-one-activation-mail-for-email-per-hour-' . md5("{$newsletterSource}-{$email}");
         $sendOneActivationMailForEmailPerHour = \Kwf_Cache_Simple::fetch($sendOneActivationMailForEmailPerHourCacheId);
         if (!$sendOneActivationMailForEmailPerHour && $sendActivationMail) {
             $this->sendActivationMail($newsletterComponent, $row);
