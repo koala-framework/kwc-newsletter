@@ -142,7 +142,7 @@ class CategoriesController extends Controller
      * @RequestParam(name="source", strict=true, nullable=true)
      * @RequestParam(name="ip", requirements=@Ip, strict=true, nullable=true)
      * @Method("POST")
-     * @View(serializerGroups={"user"})
+     * @View(serializerGroups={"openApi"})
      */
     public function postCategorySubscribersAction($id, ParamFetcher $paramFetcher, Request $request)
     {
@@ -236,7 +236,7 @@ class CategoriesController extends Controller
      * @RequestParam(name="source", strict=true, nullable=true)
      * @RequestParam(name="ip", requirements=@Ip, strict=true, nullable=true)
      * @Method("POST")
-     * @View(serializerGroups={"user"})
+     * @View(serializerGroups={"openApi"})
      */
     public function deleteCategorySubscribersAction($id, ParamFetcher $paramFetcher, Request $request)
     {
@@ -319,7 +319,7 @@ class CategoriesController extends Controller
     /**
      * @Route("/categories/{id}", requirements={"id"="[1-9]{1}\d*"})
      * @Method("GET")
-     * @View(serializerGroups={"user"})
+     * @View(serializerGroups={"openApi"})
      */
     public function getCategoryAction($id, ParamFetcher $paramFetcher)
     {

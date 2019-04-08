@@ -44,7 +44,7 @@ class SubscribersController extends SubscribersApiController
      * @Route("/subscribers")
      * @QueryParam(name="email", requirements=".+", strict=true, nullable=false, array=true)
      * @Method("GET")
-     * @View(serializerGroups={"user"})
+     * @View(serializerGroups={"openApi"})
      */
     public function getSubscriberAction(ParamFetcher $paramFetcher)
     {
@@ -74,7 +74,7 @@ class SubscribersController extends SubscribersApiController
      * @RequestParam(name="source", strict=true, nullable=true)
      * @RequestParam(name="ip", requirements=@Ip, strict=true, nullable=true)
      * @Method("PUT")
-     * @View(serializerGroups={"user"})
+     * @View(serializerGroups={"openApi"})
      */
     public function putSubscriberAction($id, ParamFetcher $paramFetcher, Request $request)
     {

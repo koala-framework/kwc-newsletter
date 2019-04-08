@@ -9,7 +9,7 @@ class SubscribersToCategories extends \Kwf_Model_Db
     protected $_serialization = array(
         'category' => array(
             'type' => 'KwfBundle\Serializer\KwfModel\ColumnNormalizer\ParentRow',
-            'groups' => 'user',
+            'groups' => 'openApi',
             'rule' => 'Category',
         ),
     );

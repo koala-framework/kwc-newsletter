@@ -7,8 +7,8 @@ class Categories extends \Kwf_Model_Db
     protected $_table = 'kwc_newsletter_categories';
     protected $_toStringField = 'category';
     protected $_serialization = array(
-        'id' => 'user',
-        'category' => 'user',
+        'id' => 'openApi',
+        'category' => 'openApi',
     );
 
     protected function _init()
