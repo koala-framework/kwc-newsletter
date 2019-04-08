@@ -1,4 +1,6 @@
 <?php
+use \KwcNewsletter\Bundle\Model\Subscribers;
+
 class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNewsletter_Kwc_Newsletter_Subscribe_AbstractRecipientsController
 {
     protected $_buttons = array('add', 'unsubscribe', 'delete');
@@ -11,16 +13,28 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNew
     public function indexAction()
     {
         parent::indexAction();
-        $admin = Kwc_Admin::getInstance($this->_getParam('class'));
-        $formControllerUrl = $admin->getControllerUrl('Recipient');
 
-        $this->view->formControllerUrl = $formControllerUrl;
-        $this->view->logsControllerUrl = $admin->getControllerUrl('Logs');
-        $this->view->xtype = 'kwc.newsletter.subscribe.recipients';
-        $this->view->model = get_class($this->_model);
-        $this->view->baseParams = array(
-            'newsletterComponentId' => $this->_getParam('newsletterComponentId')
-        );
+        $newsletterComponent = Kwf_Component_Data_Root::getInstance()
+            ->getComponentByDbId($this->_getParam('newsletterComponentId'), array('ignoreVisible' => true));
+        $admin = Kwc_Admin::getInstance($this->_getParam('class'));
+
+        $this->view->xtype = "kwf.tabpanel";
+        $this->view->activeTab = 0;
+        $this->view->tabs = array();
+        foreach (Subscribers::getSources($newsletterComponent) as $newsletterSourceId => $newsletterSourceName) {
+            $this->view->tabs[$newsletterSourceId] = array(
+                'xtype' => 'kwc.newsletter.subscribe.recipients',
+                'title' => $newsletterSourceName,
+                'model' => get_class($this->_model),
+                'controllerUrl' => $admin->getControllerUrl('Recipients'),
+                'formControllerUrl' => $admin->getControllerUrl('Recipient'),
+                'logsControllerUrl' => $admin->getControllerUrl('Logs'),
+                'baseParams' => array(
+                    'newsletterComponentId' => $this->_getParam('newsletterComponentId'),
+                    'newsletterSource' => $newsletterSourceId
+                )
+            );
+        }
     }
 
     protected function _isAllowedComponent()
@@ -109,6 +123,9 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNew
     protected function _getSelect()
     {
         $ret = parent::_getSelect();
+
+        $ret->whereEquals('newsletter_source', ($newsletterSource = $this->_getParam('newsletterSource')) ? $newsletterSource : Subscribers::DEFAULT_NEWSLETTER_SOURCE);
+
         if ($this->_model->hasColumn('newsletter_component_id')) {
             if ($this->_getParam('newsletterComponentId')) {
                 $acl = Kwf_Registry::get('acl')->getComponentAcl();
@@ -167,6 +184,7 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNew
         $model = Kwf_Model_Abstract::getInstance('KwcNewsletter\Bundle\Model\Categories');
         $s = $model->select()
             ->whereEquals('newsletter_component_id', $newsletterComponentId)
+            ->whereEquals('newsletter_source', ($newsletterSource = $this->_getParam('newsletterSource')) ? $newsletterSource : Subscribers::DEFAULT_NEWSLETTER_SOURCE)
             ->order('pos');
         return $model->getRows($s);
     }

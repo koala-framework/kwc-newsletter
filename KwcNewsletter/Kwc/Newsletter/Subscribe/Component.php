@@ -1,4 +1,6 @@
 <?php
+use \KwcNewsletter\Bundle\Model\Subscribers;
+
 /**
  * Wird auch zum bearbeiten verwendet.
  * @see KwcNewsletter_Kwc_Newsletter_Subscribe_Edit_Component
@@ -26,7 +28,6 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Component extends Kwc_Form_Componen
         $ret['from'] = ''; // would be good if overwritten
 
         $ret['menuConfig'] = 'KwcNewsletter_Kwc_Newsletter_Subscribe_MenuConfig';
-        $ret['extConfig'] = 'KwcNewsletter_Kwc_Newsletter_Subscribe_ExtConfig';
 
         $ret['assetsAdmin']['dep'][] = 'KwfAutoGrid';
         $ret['assetsAdmin']['dep'][] = 'KwfProxyPanel';
@@ -53,6 +54,7 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Component extends Kwc_Form_Componen
 
         $select = new Kwf_Model_Select();
         $select->whereEquals('newsletter_component_id', $this->getSubscribeToNewsletterComponent()->dbId);
+        $select->whereEquals('newsletter_source', $this->_getNewsletterSource());
         $select->whereEquals('email', $fnfRow->email);
         $select->whereEquals('activated', true);
         $select->whereEquals('unsubscribed', false);
@@ -69,10 +71,12 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Component extends Kwc_Form_Componen
 
         $select = new Kwf_Model_Select();
         $select->whereEquals('newsletter_component_id', $this->getSubscribeToNewsletterComponent()->dbId);
+        $select->whereEquals('newsletter_source', $this->_getNewsletterSource());
         $select->whereEquals('email', $fnfRow->email);
         $row = $model->getRow($select);
         if (!$row) $row = $model->createRow(array(
             'newsletter_component_id' => $this->getSubscribeToNewsletterComponent()->dbId,
+            'newsletter_source' => $this->_getNewsletterSource(),
             'email' => $fnfRow->email
         ));
 
@@ -110,6 +114,11 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_Component extends Kwc_Form_Componen
 
             \Kwf_Cache_Simple::add($sendOneActivationMailForEmailPerHourCacheId, true, 3600);
         }
+    }
+
+    protected function _getNewsletterSource()
+    {
+        return Subscribers::DEFAULT_NEWSLETTER_SOURCE;
     }
 
     protected function _updateRow(Kwf_Model_Row_Interface $row, Kwf_Model_Row_Interface $fnfRow)

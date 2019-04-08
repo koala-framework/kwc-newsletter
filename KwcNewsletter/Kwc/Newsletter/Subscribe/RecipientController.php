@@ -9,7 +9,7 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientController extends Kwf_Con
 
         if (!isset($this->_form)) {
             if (isset($this->_formName)) {
-                $this->_form = new $this->_formName('form', $this->_getParam('newsletterComponentId'));
+                $this->_form = new $this->_formName('form', $this->_getParam('newsletterComponentId'), $this->_getParam('newsletterSource'));
             }
         }
         parent::preDispatch();
@@ -45,6 +45,7 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientController extends Kwf_Con
     {
         parent::_beforeInsert($row);
         $row->newsletter_component_id = $this->_getParam('newsletterComponentId');
+        $row->newsletter_source = $this->_getParam('newsletterSource');
 
         $c = Kwf_Component_Data_Root::getInstance()->getComponentById($this->_getParam('newsletterComponentId'), array('ignoreVisible' => true));
         $user = Kwf_Registry::get('userModel')->getAuthedUser();
