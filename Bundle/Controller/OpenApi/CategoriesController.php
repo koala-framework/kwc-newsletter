@@ -148,8 +148,8 @@ class CategoriesController extends Controller
     {
         $this->validator->validateAndThrow($paramFetcher);
 
-        $user = $this->tokenStorage->getToken()->getUser();
-        $newsletterComponent = $user->getNewsletterComponent();
+        $openApiUser = $this->tokenStorage->getToken()->getUser();
+        $newsletterComponent = $openApiUser->getNewsletterComponent();
 
         // new subscribers from request
         $subscribers = $paramFetcher->get('subscribers');
@@ -215,7 +215,7 @@ class CategoriesController extends Controller
                         $source :
                         $newsletterComponent->trlKwf(
                             'Subscribe Open API. API Key: {0}',
-                            array($user->getUsername())
+                            array($openApiUser->getUsername())
                         ));
                 $subscriber->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
 
@@ -242,8 +242,8 @@ class CategoriesController extends Controller
     {
         $this->validator->validateAndThrow($paramFetcher);
 
-        $user = $this->tokenStorage->getToken()->getUser();
-        $newsletterComponent = $user->getNewsletterComponent();
+        $openApiUser = $this->tokenStorage->getToken()->getUser();
+        $newsletterComponent = $openApiUser->getNewsletterComponent();
 
         // subscribers to delete from request
         $subscribers = $paramFetcher->get('subscribers');
@@ -294,7 +294,7 @@ class CategoriesController extends Controller
                     $source :
                     $newsletterComponent->trlKwf(
                         'Subscribe Open API. API Key: {0}',
-                        array($user->getUsername())
+                        array($openApiUser->getUsername())
                     ));
             $subscriber->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
         }

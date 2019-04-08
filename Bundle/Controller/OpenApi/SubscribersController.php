@@ -80,8 +80,8 @@ class SubscribersController extends SubscribersApiController
     {
         $this->validator->validateAndThrow($paramFetcher);
 
-        $user = $this->tokenStorage->getToken()->getUser();
-        $newsletterComponent = $user->getNewsletterComponent();
+        $openApiUser = $this->tokenStorage->getToken()->getUser();
+        $newsletterComponent = $openApiUser->getNewsletterComponent();
 
         $s = $this->model->select();
         $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
@@ -97,10 +97,10 @@ class SubscribersController extends SubscribersApiController
         $row->setLogSource(
             ($source = $paramFetcher->get('source')) ?
                 $source :
-                $user->getNewsletterComponent()->trlKwf('Subscribe Open API. API Key: {0}', array($user->getUsername())
+                $openApiUser->getNewsletterComponent()->trlKwf('Subscribe Open API. API Key: {0}', array($openApiUser->getUsername())
                 ));
         $row->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
-        $row->writeLog($user->getNewsletterComponent()->trlKwf('Updated'));
+        $row->writeLog($openApiUser->getNewsletterComponent()->trlKwf('Updated'));
 
         if ($row->isDirty()) {
             $row->save();
@@ -127,8 +127,8 @@ class SubscribersController extends SubscribersApiController
     {
         $this->validator->validateAndThrow($paramFetcher);
 
-        $user = $this->tokenStorage->getToken()->getUser();
-        $newsletterComponent = $user->getNewsletterComponent();
+        $openApiUser = $this->tokenStorage->getToken()->getUser();
+        $newsletterComponent = $openApiUser->getNewsletterComponent();
 
         $s = $this->model->select();
         $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
@@ -148,10 +148,10 @@ class SubscribersController extends SubscribersApiController
         $row->setLogSource(
             ($source = $paramFetcher->get('source')) ?
                 $source :
-                $user->getNewsletterComponent()->trlKwf('Subscribe Open API. API Key: {0}', array($user->getUsername())
+                $openApiUser->getNewsletterComponent()->trlKwf('Subscribe Open API. API Key: {0}', array($openApiUser->getUsername())
                 ));
         $row->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
-        $row->writeLog($user->getNewsletterComponent()->trlKwf('Unsubscribed'), 'unsubscribed');
+        $row->writeLog($openApiUser->getNewsletterComponent()->trlKwf('Unsubscribed'), 'unsubscribed');
 
         $row->unsubscribed = true;
         $row->save();
@@ -176,8 +176,8 @@ class SubscribersController extends SubscribersApiController
      */
     public function postSubscribeAction(ParamFetcher $paramFetcher, Request $request)
     {
-        $user = $this->tokenStorage->getToken()->getUser();
-        $newsletterComponent = $user->getNewsletterComponent();
+        $openApiUser = $this->tokenStorage->getToken()->getUser();
+        $newsletterComponent = $openApiUser->getNewsletterComponent();
         $doubleOptIn = $paramFetcher->get('doubleOptIn');
 
         // call parent insert with our parameters
@@ -186,7 +186,7 @@ class SubscribersController extends SubscribersApiController
             $request,
             $doubleOptIn,
             $newsletterComponent,
-            $newsletterComponent->trlKwf('Subscribe Open API. API Key: {0}', array($user->getUsername()))
+            $newsletterComponent->trlKwf('Subscribe Open API. API Key: {0}', array($openApiUser->getUsername()))
         );
 
         // handle categories
