@@ -114,35 +114,6 @@ class CategoriesController extends Controller
     }
 
     /**
-     * @Route("/categories/{id}/subscribers", requirements={"id"="[1-9]{1}\d*"})
-     * @Method("GET")
-     * @View(serializerGroups={"openApi"})
-     */
-    public function getCategorySubscribersAction($id, ParamFetcher $paramFetcher)
-    {
-        $this->validator->validateAndThrow($paramFetcher);
-
-        $newsletterComponent = $this->tokenStorage->getToken()->getUser()->getNewsletterComponent();
-
-        $s = $this->model->select();
-        $s->whereEquals('id', $id);
-        $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
-        $row = $this->model->getRow($s);
-
-        if (!$row) {
-            throw new NotFoundHttpException($newsletterComponent->trlKwf('Category not found'));
-        }
-
-        // find subscribers
-        $subscribersToCategoryModel = $this->model->getDependentModel('ToSubscribers');
-        $subscribersModel = $subscribersToCategoryModel->getReferencedModel('Subscriber');
-        $s = $subscribersModel->select();
-        $s->whereEquals('id', explode(',', $row->subscriber_ids));
-
-        return $subscribersModel->getIds($s);
-    }
-
-    /**
      * @Route("/categories/{id}/add-subscribers", requirements={"id"="[1-9]{1}\d*"})
      * @RequestParam(name="subscribers", requirements="[1-9]{1}\d*", strict=true, nullable=false, array=true)
      * @RequestParam(name="source", strict=true, nullable=true)
