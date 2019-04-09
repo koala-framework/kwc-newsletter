@@ -65,8 +65,14 @@ class SubscribersApiController extends Controller
 
         return new JsonResponse(array(
             'message' => $this->subscribersService->createSubscriberFromRequest(
-                $paramFetcher,
-                $request,
+                array_merge(
+                    $paramFetcher->all(),
+                    array('ip' =>
+                        ($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp(),
+                        'categoryId' => $request->get('categoryId'),
+                        'source' => ($source = $paramFetcher->get('source')) ? $source : $newsletterComponent->getSubroot()->trlKwf('Subscribe API'),
+                    )
+                ),
                 $newsletterComponent
             ),
         ), JsonResponse::HTTP_OK);

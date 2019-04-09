@@ -2,7 +2,6 @@
 namespace KwcNewsletter\Bundle\Service;
 
 use KwcNewsletter\Bundle\Model\Subscribers as SubscribersModel;
-use FOS\RestBundle\Request\ParamFetcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 class Subscribers {
@@ -18,25 +17,17 @@ class Subscribers {
     }
 
     /**
-     * @param ParamFetcherInterface $paramFetcher
-     * @param Request $request
+     * @param array $params
      * @param \Kwf_Component_Data $newsletterComponent
-     * @param \Kwf_Component_Data|null $subroot
-     * @param null $logSource
-     * @param bool $doubleOptIn
      * @return string Message about subscription to be sent back to frontend / in response
      */
-    public function createSubscriberFromRequest(
-        ParamFetcherInterface $paramFetcher,
-        Request $request,
-        \Kwf_Component_Data $newsletterComponent,
-        $logSource=null,
-        $doubleOptIn=true)
+    public function createSubscriberFromRequest(array $params, \Kwf_Component_Data $newsletterComponent)
     {
         $subroot = $newsletterComponent->getSubroot();
 
-        $newsletterSource = $paramFetcher->get('newsletterSource');
-        $email = $paramFetcher->get('email');
+        $newsletterSource = $params['newsletterSource'];
+        $email = $params['email'];
+        $doubleOptIn = array_key_exists('doubleOptIn', $params) ? $params['doubleOptIn'] : true;
 
         $s = new \Kwf_Model_Select();
         $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
@@ -56,10 +47,10 @@ class Subscribers {
             $row->activated = true;
         }
 
-        $this->updateRow($row, $paramFetcher);
+        $this->updateRow($row, $params);
 
-        $row->setLogSource(($source = $paramFetcher->get('source')) ? $source : ($logSource ? $logSource : $subroot->trlKwf('Subscribe API')));
-        $row->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
+        $row->setLogSource($params['source']);
+        $row->setLogIp($params['ip']);
 
         $sendActivationMail = false;
         if ($row->activated) {
@@ -74,12 +65,12 @@ class Subscribers {
             $sendActivationMail = true;
         }
 
-        if ($categoryId = $request->get('categoryId')) {
+        if ($params['categoryId']) {
             $s = new \Kwf_Model_Select();
-            $s->whereEquals('category_id', $categoryId);
+            $s->whereEquals('category_id', $params['categoryId']);
             if (!$row->countChildRows('ToCategories', $s)) {
                 $row->createChildRow('ToCategories', array(
-                    'category_id' => $categoryId
+                    'category_id' => $params['categoryId']
                 ));
             }
         }
@@ -119,11 +110,11 @@ class Subscribers {
         );
     }
 
-    protected function updateRow(\Kwf_Model_Row_Abstract $row, ParamFetcherInterface $paramFetcher)
+    protected function updateRow(\Kwf_Model_Row_Abstract $row, array $params)
     {
-        $row->gender = strtolower($paramFetcher->get('gender'));
-        $row->title = ($title = $paramFetcher->get('title')) ? $title : '';
-        $row->firstname = $paramFetcher->get('firstname');
-        $row->lastname = $paramFetcher->get('lastname');
+        $row->gender = strtolower($params['gender']);
+        $row->title = ($title = $params['title']) ? $title : '';
+        $row->firstname = $params['firstname'];
+        $row->lastname = $params['lastname'];
     }
 }

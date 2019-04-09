@@ -188,15 +188,24 @@ class SubscribersController extends Controller
     {
         $openApiUser = $this->tokenStorage->getToken()->getUser();
         $newsletterComponent = $openApiUser->getNewsletterComponent();
-        $doubleOptIn = $paramFetcher->get('doubleOptIn');
 
         // call service our parameters
         $message = $this->subscribersService->createSubscriberFromRequest(
-            $paramFetcher,
-            $request,
-            $newsletterComponent,
-            $newsletterComponent->trlKwf('Subscribe Open API. API Key: {0}', array($openApiUser->getUsername())),
-            $doubleOptIn
+            array_merge(
+                $paramFetcher->all(),
+                array(
+                    'ip' => ($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp(),
+                    'categoryId' => $request->get('categoryId'),
+                    'source' =>
+                        ($source = $paramFetcher->get('source')) ?
+                            $source :
+                            $newsletterComponent->getSubroot()->trlKwf(
+                                    'Subscribe Open API. API Key: {0}',
+                                    array($openApiUser->getUsername())
+                            ),
+                )
+            ),
+            $newsletterComponent
         );
 
         // handle categories
