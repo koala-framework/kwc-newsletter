@@ -15,3 +15,6 @@ services:
         class: KwcNewsletter\Bundle\UpdatesProvider\UpdatesProvider
         tags:
             - { name: kwf.updates_provider }
+    kwc_newsletter.service.subscribers:
+        class: KwcNewsletter\Bundle\Service\Subscribers
+        autowire: true

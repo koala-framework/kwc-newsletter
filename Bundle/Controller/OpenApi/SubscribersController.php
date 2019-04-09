@@ -2,12 +2,13 @@
 
 namespace KwcNewsletter\Bundle\Controller\OpenApi;
 
-use KwcNewsletter\Bundle\Controller\SubscribersApiController;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use FOS\RestBundle\Controller\Annotations\QueryParam;
 use FOS\RestBundle\Controller\Annotations\RequestParam;
 use FOS\RestBundle\Controller\Annotations\View;
 use FOS\RestBundle\Request\ParamFetcher;
 use KwcNewsletter\Bundle\Model\Subscribers;
+use KwcNewsletter\Bundle\Service\Subscribers as SubscribersService;
 use KwfBundle\Validator\ErrorCollectValidator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -24,7 +25,7 @@ use Symfony\Component\Validator\Constraints\Ip;
 /**
  * @Route("/api/v1/open", service="kwc_newsletter.controller.open_api.subscribers")
  */
-class SubscribersController extends SubscribersApiController
+class SubscribersController extends Controller
 {
     /* @var ErrorCollectValidator */
     protected $validator;
@@ -32,12 +33,17 @@ class SubscribersController extends SubscribersApiController
     protected $tokenStorage;
     /* @var Subscribers */
     protected $model;
+    /**
+     * @var SubscribersService
+     */
+    protected $subscribersService;
 
-    public function __construct(Subscribers $model, ErrorCollectValidator $validator, TokenStorage $tokenStorage)
+    public function __construct(Subscribers $model, SubscribersService $subscribersService, ErrorCollectValidator $validator, TokenStorage $tokenStorage)
     {
         $this->model = $model;
         $this->validator = $validator;
         $this->tokenStorage = $tokenStorage;
+        $this->subscribersService = $subscribersService;
     }
 
     /**
@@ -184,13 +190,13 @@ class SubscribersController extends SubscribersApiController
         $newsletterComponent = $openApiUser->getNewsletterComponent();
         $doubleOptIn = $paramFetcher->get('doubleOptIn');
 
-        // call parent insert with our parameters
-        parent::postAction(
+        // call service our parameters
+        $message = $this->subscribersService->createSubscriberFromRequest(
             $paramFetcher,
             $request,
-            $doubleOptIn,
             $newsletterComponent,
-            $newsletterComponent->trlKwf('Subscribe Open API. API Key: {0}', array($openApiUser->getUsername()))
+            $newsletterComponent->trlKwf('Subscribe Open API. API Key: {0}', array($openApiUser->getUsername())),
+            $doubleOptIn
         );
 
         // handle categories
@@ -248,7 +254,7 @@ class SubscribersController extends SubscribersApiController
         }
 
         return array(
-            'message' => $this->getMessage($newsletterComponent, $doubleOptIn),
+            'message' => $message,
             'categories' => $categoriesRet,
         );
     }
