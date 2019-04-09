@@ -43,18 +43,21 @@ class SubscribersController extends SubscribersApiController
     /**
      * @Route("/subscribers")
      * @QueryParam(name="email", requirements=".+", strict=true, nullable=false, array=true)
+     * @QueryParam(name="newsletterSource", strict=true, default=Subscribers::DEFAULT_NEWSLETTER_SOURCE)
      * @Method("GET")
      * @View(serializerGroups={"openApi"})
      */
-    public function getSubscriberAction(ParamFetcher $paramFetcher)
+    public function getSubscribersAction(ParamFetcher $paramFetcher)
     {
         $this->validator->validateAndThrow($paramFetcher);
         $email = $paramFetcher->get('email');
+        $newsletterSource = $paramFetcher->get('newsletterSource');
 
         $newsletterComponent = $this->tokenStorage->getToken()->getUser()->getNewsletterComponent();
 
         $s = $this->model->select();
         $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
+        $s->whereEquals('newsletter_source', $newsletterSource);
         $s->whereEquals('email', $email);
         $rows = $this->model->getRows($s);
 
@@ -173,6 +176,7 @@ class SubscribersController extends SubscribersApiController
      * @RequestParam(name="source", strict=true, nullable=true)
      * @RequestParam(name="ip", requirements=@Ip, strict=true, nullable=true)
      * @RequestParam(name="doubleOptIn", requirements="(1|)", strict=true, nullable=true, default=true)
+     * @RequestParam(name="newsletterSource", strict=true, default=Subscribers::DEFAULT_NEWSLETTER_SOURCE)
      */
     public function postSubscribeAction(ParamFetcher $paramFetcher, Request $request)
     {
@@ -191,8 +195,10 @@ class SubscribersController extends SubscribersApiController
 
         // handle categories
         $email = $paramFetcher->get('email');
+        $newsletterSource = $paramFetcher->get('newsletterSource');
         $s = new \Kwf_Model_Select();
         $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
+        $s->whereEquals('newsletter_source', $newsletterSource);
         $s->whereEquals('email', $email);
         $row = $this->model->getRow($s);
 
@@ -219,6 +225,7 @@ class SubscribersController extends SubscribersApiController
                 $s = $categoriesModel->select();
                 $s->whereEquals('id', $categoryId);
                 $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
+                $s->whereEquals('newsletter_source', $newsletterSource);
                 $categoryRow = $categoriesModel->getRow($s);
 
                 if ($categoryRow) {
@@ -236,6 +243,8 @@ class SubscribersController extends SubscribersApiController
                     $categoriesRet['not_found']++;
                 }
             }
+
+            if ($row->isDirty()) $row->save();
         }
 
         return array(
