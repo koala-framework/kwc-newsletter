@@ -26,14 +26,6 @@ Newsletter Component for Koala Framework
 
 #### Subscriber API
 
-* Disable CSRF protection for subscribers api in `config.yml`
-
-        kwf:
-            csrf_protection:
-                ignore_paths:
-                    ...
-                    - ^/api/v1/subscribers
-
 * Add routes to `routing.yml`
 
         kwc_newsletter_subscribers_api:
@@ -47,34 +39,7 @@ Newsletter Component for Koala Framework
             ...
 
 #### Subscriber Open API
-
-* Disable CSRF protection for open api in `config.yml`
-
-        kwf:
-            csrf_protection:
-                ignore_paths:
-                    ...
-                    - ^/api/v1/open
-                    
-* Enable FOS Rest Bundle's serializer in `config.yml`
-
-        fos_rest:
-            routing_loader:
-                default_format: json
-                include_format: false
-            format_listener:
-                enabled: true
-                rules:
-                    - { path: '^/api/v1/open', fallback_format: json }
-
-* Add API-key user provider to `security.yml`
-
-        providers:
-            ...
-            api_key_user_provider:
-                id: api_key_user_provider
-            ...
-
+                
 * Add firewalls entry to `security.yml`
 
         firewalls:
