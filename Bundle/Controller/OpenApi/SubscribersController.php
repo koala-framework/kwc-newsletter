@@ -190,7 +190,7 @@ class SubscribersController extends Controller
         $newsletterComponent = $openApiUser->getNewsletterComponent();
 
         // call service our parameters
-        $message = $this->subscribersService->createSubscriberFromRequest(
+        $message = $this->subscribersService->createSubscriber(
             array_merge(
                 $paramFetcher->all(),
                 array(

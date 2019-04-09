@@ -2,7 +2,6 @@
 namespace KwcNewsletter\Bundle\Service;
 
 use KwcNewsletter\Bundle\Model\Subscribers as SubscribersModel;
-use Symfony\Component\HttpFoundation\Request;
 
 class Subscribers {
 
@@ -21,7 +20,7 @@ class Subscribers {
      * @param \Kwf_Component_Data $newsletterComponent
      * @return string Message about subscription to be sent back to frontend / in response
      */
-    public function createSubscriberFromRequest(array $params, \Kwf_Component_Data $newsletterComponent)
+    public function createSubscriber(array $params, \Kwf_Component_Data $newsletterComponent)
     {
         $subroot = $newsletterComponent->getSubroot();
 

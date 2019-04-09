@@ -64,7 +64,7 @@ class SubscribersApiController extends Controller
         );
 
         return new JsonResponse(array(
-            'message' => $this->subscribersService->createSubscriberFromRequest(
+            'message' => $this->subscribersService->createSubscriber(
                 array_merge(
                     $paramFetcher->all(),
                     array('ip' =>
