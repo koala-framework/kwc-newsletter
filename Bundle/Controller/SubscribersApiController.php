@@ -12,6 +12,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\RequestParam;
 use KwcNewsletter\Bundle\Model\Subscribers;
+use KwcNewsletter\Bundle\Service\Subscribers as SubscribersService;
 
 /**
  * @Route("/api/v1", service="kwc_newsletter.controller.subscribers_api")
@@ -21,16 +22,21 @@ class SubscribersApiController extends Controller
     /**
      * @var Subscribers
      */
-    private $model;
+    protected $model;
+    /**
+     * @var SubscribersService
+     */
+    protected $subscribersService;
     /**
      * @var boolean
      */
     private $requireCountry;
 
-    public function __construct(Subscribers $model, $requireCountry)
+    public function __construct(Subscribers $model, SubscribersService $subscribersService, $requireCountry)
     {
         $this->model = $model;
         $this->requireCountry = $requireCountry;
+        $this->subscribersService = $subscribersService;
     }
 
     /**
@@ -52,62 +58,23 @@ class SubscribersApiController extends Controller
         $root = \Kwf_Component_Data_Root::getInstance();
         $subroot = ($country = $this->getCountry($paramFetcher)) ? $root->getComponentById('root-' . strtolower($country)) : $root;
         if (!$subroot) throw new \Kwf_Exception('Subroot not found');
+
         $newsletterComponent = \Kwf_Component_Data_Root::getInstance()->getComponentByClass(
             'KwcNewsletter_Kwc_Newsletter_Component', array('subroot' => $subroot)
         );
 
-        $newsletterSource = $paramFetcher->get('newsletterSource');
-        $email = $paramFetcher->get('email');
-        $s = new \Kwf_Model_Select();
-        $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
-        $s->whereEquals('newsletter_source', $newsletterSource);
-        $s->whereEquals('email', $email);
-        $row = $this->model->getRow($s);
-        if (!$row) {
-            $row = $this->model->createRow(array(
-                'newsletter_component_id' => $newsletterComponent->dbId,
-                'newsletter_source' => $newsletterSource,
-                'email' => $email
-            ));
-        }
-
-        $this->updateRow($row, $paramFetcher);
-
-        $row->setLogSource(($source = $paramFetcher->get('source')) ? $source : $subroot->trlKwf('Subscribe API'));
-        $row->setLogIp(($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp());
-
-        $sendActivationMail = false;
-        if (!$row->activated || $row->unsubscribed) {
-            $row->writeLog($subroot->trlKwf('Subscribed'), 'subscribed');
-
-            $row->unsubscribed = false;
-            $row->activated = false;
-
-            $sendActivationMail = true;
-        }
-
-        if ($categoryId = $request->get('categoryId')) {
-            $s = new \Kwf_Model_Select();
-            $s->whereEquals('category_id', $categoryId);
-            if (!$row->countChildRows('ToCategories', $s)) {
-                $row->createChildRow('ToCategories', array(
-                    'category_id' => $categoryId
-                ));
-            }
-        }
-
-        if ($row->isDirty()) $row->save();
-
-        $sendOneActivationMailForEmailPerHourCacheId = 'send-one-activation-mail-for-email-per-hour-' . md5("{$newsletterSource}-{$email}");
-        $sendOneActivationMailForEmailPerHour = \Kwf_Cache_Simple::fetch($sendOneActivationMailForEmailPerHourCacheId);
-        if (!$sendOneActivationMailForEmailPerHour && $sendActivationMail) {
-            $this->sendActivationMail($newsletterComponent, $row);
-
-            \Kwf_Cache_Simple::add($sendOneActivationMailForEmailPerHourCacheId, true, 3600);
-        }
-
         return new JsonResponse(array(
-            'message' => $this->getMessage($subroot)
+            'message' => $this->subscribersService->createSubscriber(
+                array_merge(
+                    $paramFetcher->all(),
+                    array('ip' =>
+                        ($ip = $paramFetcher->get('ip')) ? $ip : $request->getClientIp(),
+                        'categoryId' => $request->get('categoryId'),
+                        'source' => ($source = $paramFetcher->get('source')) ? $source : $newsletterComponent->getSubroot()->trlKwf('Subscribe API'),
+                    )
+                ),
+                $newsletterComponent
+            ),
         ), JsonResponse::HTTP_OK);
     }
 
@@ -126,34 +93,5 @@ class SubscribersApiController extends Controller
         }
 
         return $ret;
-    }
-
-    protected function getMessage(\Kwf_Component_Data $subroot)
-    {
-        return $subroot->trlKwf(
-            'Thank you for your subscription. If you have not been added to our newsletter-distributor yet, you will shortly receive an email with your activation link. Please click on the link to confirm your subscription.'
-        );
-    }
-
-    protected function updateRow(\Kwf_Model_Row_Abstract $row, ParamFetcher $paramFetcher)
-    {
-        $row->gender = strtolower($paramFetcher->get('gender'));
-        $row->title = ($title = $paramFetcher->get('title')) ? $title : '';
-        $row->firstname = $paramFetcher->get('firstname');
-        $row->lastname = $paramFetcher->get('lastname');
-    }
-
-    protected function sendActivationMail(\Kwf_Component_Data $newsletterComponent, \Kwc_Mail_Recipient_Interface $row)
-    {
-        $subscribe = \Kwf_Component_Data_Root::getInstance()->getComponentByClass(
-        'KwcNewsletter_Kwc_Newsletter_Subscribe_Component', array('subroot' => $newsletterComponent->getSubroot(), 'limit' => 1)
-        );
-        $subscribe->getChildComponent('_mail')->getComponent()->send($row, array(
-            'formRow' => $row,
-            'host' => $newsletterComponent->getDomain(),
-            'unsubscribeComponent' => null,
-            'editComponent' => $newsletterComponent->getChildComponent('_editSubscriber'),
-            'doubleOptInComponent' => $subscribe->getChildComponent('_doubleOptIn')
-        ));
     }
 }

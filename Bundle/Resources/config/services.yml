@@ -4,6 +4,17 @@ imports:
     - { resource: services/model.yml }
     - { resource: services/importer.yml }
     - { resource: services/controller.yml }
-
 services:
-
+    apikey_authenticator:
+        class: KwcNewsletter\Bundle\Security\ApiKeyAuthenticator
+        public: false
+    api_key_user_provider:
+        class: KwcNewsletter\Bundle\Security\ApiKeyUserProvider
+        arguments: [@kwc_newsletter.model.newsletter_api_keys]
+    kwc_newsletter.updates_provider.updates_provider:
+        class: KwcNewsletter\Bundle\UpdatesProvider\UpdatesProvider
+        tags:
+            - { name: kwf.updates_provider }
+    kwc_newsletter.service.subscribers:
+        class: KwcNewsletter\Bundle\Service\Subscribers
+        autowire: true

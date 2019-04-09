@@ -5,6 +5,10 @@ class Categories extends \Kwf_Model_Db
 {
     protected $_table = 'kwc_newsletter_categories';
     protected $_toStringField = 'category';
+    protected $_serialization = array(
+        'id' => 'openApi',
+        'category' => 'openApi',
+    );
 
     protected function _init()
     {
@@ -25,6 +29,8 @@ class Categories extends \Kwf_Model_Db
         $select = new \Kwf_Model_Select();
         $select->whereEquals('subscriber_unsubscribed', true);
         $this->_exprs['count_unsubscribed'] = new \Kwf_Model_Select_Expr_Child_Count('ToSubscribers', $select);
+
+        $this->_exprs['subscriber_ids'] = new \Kwf_Model_Select_Expr_Child_GroupConcat('ToSubscribers', 'subscriber_id', ',');
     }
 
     protected function _setupFilters()

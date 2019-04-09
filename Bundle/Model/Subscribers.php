@@ -22,6 +22,17 @@ class Subscribers extends \Kwf_Model_Db
             'unsubscribed' => 'unsubscribed'
         )
     );
+    protected $_serialization = array(
+        'gender' => 'openApi',
+        'title' => 'openApi',
+        'firstname' => 'openApi',
+        'lastname' => 'openApi',
+        'email' => 'openApi',
+        'last_subscribe_date' => 'openApi',
+        'last_activated_date' => 'openApi',
+        'last_unsubscribe_date' => 'openApi',
+        'category_ids' => 'openApi',
+    );
 
     protected function _init()
     {

@@ -27,6 +27,19 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end() //subscribers
+                ->arrayNode('open_api')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->arrayNode('categories')
+                            ->addDefaultsIfNotSet()
+                            ->children()
+                                ->integerNode('subscribers_limit')
+                                    ->defaultValue(1000)
+                                ->end()
+                            ->end()
+                        ->end() // categories
+                    ->end()
+                ->end() // open_api
             ->end();
 
         return $treeBuilder;
