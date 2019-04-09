@@ -39,6 +39,17 @@ Newsletter Component for Koala Framework
             ...
 
 #### Subscriber Open API
+
+* Enable FOS Rest Bundle's serializer in `config.yml`
+
+        fos_rest:
+            routing_loader:
+                default_format: json
+                include_format: false
+            format_listener:
+                enabled: true
+                rules:
+                    - { path: '^/api/v1/open', fallback_format: json }
                 
 * Add firewalls entry to `security.yml`
 

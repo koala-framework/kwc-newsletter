@@ -35,26 +35,7 @@ class KwcNewsletterExtension extends Extension implements PrependExtensionInterf
                     'ignore_paths' => array(
                         '^/api/v1/subscribers',
                         '^/api/v1/open',
-                        '^/api/v1/carlog/subscribers',
                     )
-                )
-            ));
-        }
-
-        if (isset($bundles['FOSRestBundle'])) { // Add serializer config for FOS rest bundle
-            $container->prependExtensionConfig('fos_rest', array(
-                'routing_loader' => array(
-                    'default_format' => 'json',
-                    'include_format' => false,
-                ),
-                'format_listener' => array(
-                    'enabled' => true,
-                    'rules' => array(
-                        array(
-                            'path' => '^/api/v1',
-                            'fallback_format' => 'json',
-                        ),
-                    ),
                 )
             ));
         }
