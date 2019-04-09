@@ -139,7 +139,7 @@ class CategoriesController extends Controller
         $s = $subscribersModel->select();
         $s->whereEquals('id', explode(',', $row->subscriber_ids));
 
-        return $subscribersModel->getRows($s);
+        return $subscribersModel->getIds($s);
     }
 
     /**
