@@ -173,16 +173,18 @@ class CategoriesController extends Controller
         $s->whereEquals('newsletter_component_id', $newsletterComponent->dbId);
         $subscriberRows = $subscribersModel->getRows($s);
 
-        // subscribers in the category
-        $categorySubscribers = explode(',', $row->subscriber_ids);
-
         // update not found
         $ret['not_found'] = $ret['total'] - count($subscriberRows);
 
         foreach ($subscriberRows as $subscriber) {
 
+            // checking subscriber in the category
+            $select = $subscribersToCategoryModel->select();
+            $select->whereEquals('category_id', $row->id);
+            $select->whereEquals('subscriber_id', $subscriber->id);
+
             // not in the category
-            if (!in_array($subscriber->id, $categorySubscribers)) {
+            if (!$subscribersToCategoryModel->countRows($select)) {
                 $category = $subscribersToCategoryModel->createRow(array(
                     'subscriber_id' => $subscriber->id,
                     'category_id' => $row->id,
