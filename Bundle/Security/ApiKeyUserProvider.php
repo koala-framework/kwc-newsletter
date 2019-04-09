@@ -56,6 +56,6 @@ class ApiKeyUserProvider implements UserProviderInterface
 
     public function supportsClass($class)
     {
-        return User::class === $class;
+        return 'Symfony\Component\Security\Core\User\User' === $class;
     }
 }
