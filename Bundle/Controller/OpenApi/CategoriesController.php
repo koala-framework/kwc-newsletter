@@ -3,9 +3,11 @@
 namespace KwcNewsletter\Bundle\Controller\OpenApi;
 
 use FOS\RestBundle\Controller\Annotations\RequestParam;
+use FOS\RestBundle\Controller\Annotations\QueryParam;
 use FOS\RestBundle\Controller\Annotations\View;
 use FOS\RestBundle\Request\ParamFetcher;
 use KwcNewsletter\Bundle\Model\Categories;
+use KwcNewsletter\Bundle\Model\Subscribers;
 use KwfBundle\Validator\ErrorCollectValidator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -40,8 +42,9 @@ class CategoriesController extends Controller
 
     /**
      * @Route("/categories")
+     * @QueryParam(name="newsletterSource", strict=true, default=Subscribers::DEFAULT_NEWSLETTER_SOURCE)
      * @Method("GET")
-     * @View(serializerGroups={"user"})
+     * @View(serializerGroups={"openApi"})
      */
     public function getCategoriesAction(ParamFetcher $paramFetcher)
     {
@@ -49,6 +52,7 @@ class CategoriesController extends Controller
 
         $s = $this->model->select();
         $s->whereEquals('newsletter_component_id', $this->tokenStorage->getToken()->getUser()->getNewsletterComponent()->dbId);
+        $s->whereEquals('newsletter_source', $paramFetcher->get('newsletterSource'));
 
         return $this->model->getRows($s);
     }
@@ -56,8 +60,9 @@ class CategoriesController extends Controller
     /**
      * @Route("/categories")
      * @RequestParam(name="category", requirements=".+", strict=true, nullable=false)
+     * @RequestParam(name="newsletterSource", strict=true, default=Subscribers::DEFAULT_NEWSLETTER_SOURCE)
      * @Method("POST")
-     * @View(serializerGroups={"user"}, statusCode=201)
+     * @View(serializerGroups={"openApi"}, statusCode=201)
      */
     public function postCategoryAction(ParamFetcher $paramFetcher, Request $request)
     {
@@ -65,6 +70,7 @@ class CategoriesController extends Controller
 
         $row = $this->model->createRow(array(
             'newsletter_component_id' => $this->tokenStorage->getToken()->getUser()->getNewsletterComponent()->dbId,
+            'newsletter_source' => $paramFetcher->get('newsletterSource'),
         ));
         $this->updateRow($row, $paramFetcher);
         $row->save();
@@ -81,7 +87,7 @@ class CategoriesController extends Controller
      * @Route("/categories/{id}", requirements={"id"="[1-9]{1}\d*"})
      * @RequestParam(name="category", requirements=".+", strict=true, nullable=false)
      * @Method("PUT")
-     * @View(serializerGroups={"user"})
+     * @View(serializerGroups={"openApi"})
      */
     public function putCategoryAction($id, ParamFetcher $paramFetcher, Request $request)
     {
@@ -110,7 +116,7 @@ class CategoriesController extends Controller
     /**
      * @Route("/categories/{id}/subscribers", requirements={"id"="[1-9]{1}\d*"})
      * @Method("GET")
-     * @View(serializerGroups={"user"})
+     * @View(serializerGroups={"openApi"})
      */
     public function getCategorySubscribersAction($id, ParamFetcher $paramFetcher)
     {
