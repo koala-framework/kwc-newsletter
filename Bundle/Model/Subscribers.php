@@ -1,5 +1,4 @@
 <?php
-
 namespace KwcNewsletter\Bundle\Model;
 
 use \Kwf_Component_Data;

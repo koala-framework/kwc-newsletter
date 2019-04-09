@@ -1,5 +1,4 @@
 <?php
-
 namespace KwcNewsletter\Bundle\Model;
 
 class Categories extends \Kwf_Model_Db
