@@ -69,4 +69,9 @@ class Subscribers extends \Kwf_Model_Db
         }
         return $ret;
     }
+
+    public function getDefaultNewsletterSource()
+    {
+        return self::DEFAULT_NEWSLETTER_SOURCE;
+    }
 }
