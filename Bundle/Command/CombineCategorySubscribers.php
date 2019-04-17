@@ -55,7 +55,8 @@ class CombineCategorySubscribers extends Command
                 'newsletterSource',
                 'ns',
                 InputOption::VALUE_REQUIRED,
-                'Newsletter source where the subscribers category should be changed'
+                'Newsletter source where the subscribers category should be changed',
+                $this->subscribersToCategories->getReferencedModel('Subscriber')->getDefaultNewsletterSource()
             )
             ->addOption(
                 'sourceCategoryIds',
