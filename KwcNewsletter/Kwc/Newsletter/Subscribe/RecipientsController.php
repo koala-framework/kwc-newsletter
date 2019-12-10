@@ -26,7 +26,7 @@ class KwcNewsletter_Kwc_Newsletter_Subscribe_RecipientsController extends KwcNew
                 'xtype' => 'kwc.newsletter.subscribe.recipients',
                 'title' => $newsletterSourceName,
                 'model' => get_class($this->_model),
-                'controllerUrl' => $admin->getControllerUrl('Recipients'),
+                'controllerUrl' => $this->getRequest()->getPathInfo(),
                 'formControllerUrl' => $admin->getControllerUrl('Recipient'),
                 'logsControllerUrl' => $admin->getControllerUrl('Logs'),
                 'baseParams' => array(
