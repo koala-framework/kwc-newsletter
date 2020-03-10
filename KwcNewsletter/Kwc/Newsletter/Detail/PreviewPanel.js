@@ -5,9 +5,11 @@ Kwc.Newsletter.Detail.PreviewPanel = Ext2.extend(Kwf.Binding.AbstractPanel, {
     bodyCssClass: 'mailPreviewPanel',
     button: [],
     sources: [],
+    newsletterSourceOptions: [],
     html: false,
     text: false,
     disableComboBox: false,
+    disableNewsletterSourcesComboBox: false,
 
     initComponent : function()
     {
@@ -86,17 +88,64 @@ Kwc.Newsletter.Detail.PreviewPanel = Ext2.extend(Kwf.Binding.AbstractPanel, {
                     var object = { subscribeModelKey: record.data.id };
                     Ext2.apply(this.baseParams, object);
                     this.recipientComboBox.setFormBaseParams(object);
-                    if (this.recipientComboBox.disabled) this.recipientComboBox.enable();
+                    if (this.newsletterSourceOptions.length === 1) {
+                        if (this.recipientComboBox.disabled) {
+                            this.recipientComboBox.enable();
+                        }
+                    } else {
+                        if (this.newsletterSourcesComboBox.disabled) {
+                            this.newsletterSourcesComboBox.enable();
+                        }
+                    }
                     delete this.recipientComboBox.lastQuery;
                 },
                 scope: this
             }
         });
 
-        if (this.sources.length == 1) {
+        for (var key in this.newsletterSources) {
+            if (this.newsletterSources[key].title) {
+                this.newsletterSourceOptions.push([key, this.newsletterSources[key].title]);
+            }
+        }
+
+        if (this.sources.length > 1 || this.newsletterSourceOptions.length > 1) {
+            this.disableComboBox = true;
+        }
+
+        if (this.sources.length === 1) {
             this.subscribeModelComboBox.hide();
         } else {
-            this.disableComboBox = true;
+            this.disableNewsletterSourcesComboBox = true;
+        }
+
+        this.newsletterSourcesComboBox = new Kwf.Form.ComboBox({
+            triggerAction: 'all',
+            editable: false,
+            disabled: this.disableNewsletterSourcesComboBox,
+            width: 200,
+            maxHeight: 350,
+            listWidth: 280,
+            emptyText: trlKwf('Select a newsletter source...'),
+            store: {
+                data: this.newsletterSourceOptions
+            },
+            listeners: {
+                select: function(combo, record, index) {
+                    var object = { newsletterSource: record.data.id };
+                    Ext2.apply(this.baseParams, object);
+                    this.recipientComboBox.setFormBaseParams(object);
+                    if (this.recipientComboBox.disabled) {
+                        this.recipientComboBox.enable();
+                    }
+                    delete this.recipientComboBox.lastQuery;
+                },
+                scope: this
+            }
+        });
+
+        if (this.newsletterSourceOptions.length === 1) {
+            this.newsletterSourcesComboBox.hide();
         }
 
         this.recipientComboBox = new Kwf.Form.ComboBox({
@@ -138,7 +187,7 @@ Kwc.Newsletter.Detail.PreviewPanel = Ext2.extend(Kwf.Binding.AbstractPanel, {
             }
         }, this);
 
-        this.tbar = [this.button['html'], this.button['text'], '-', trlKwf('Send testmail to:'), this.addressField, this.sendButton, '-', this.subscribeModelComboBox, this.recipientComboBox];
+        this.tbar = [this.button['html'], this.button['text'], '-', trlKwf('Send testmail to:'), this.addressField, this.sendButton, '-', this.subscribeModelComboBox, this.newsletterSourcesComboBox, this.recipientComboBox];
         Kwc.Newsletter.Detail.PreviewPanel.superclass.initComponent.call(this);
     },
 

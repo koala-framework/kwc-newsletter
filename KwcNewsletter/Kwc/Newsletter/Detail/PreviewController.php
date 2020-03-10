@@ -23,6 +23,9 @@ class KwcNewsletter_Kwc_Newsletter_Detail_PreviewController extends Kwc_Mail_Pre
         }
         $select = new Kwf_Model_Select();
         $select->whereEquals('id', $recipientId);
+        if ($nlSource = $this->getParam('newsletterSource')) {
+            $select->whereEquals('newsletter_source', $nlSource);
+        }
         $subscribeModelKey = $this->_getParam('subscribeModelKey');
         if (!$subscribeModelKey) $subscribeModelKey = current(array_keys($rs));
         $model = $rs[$subscribeModelKey]['model'];

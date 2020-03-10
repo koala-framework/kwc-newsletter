@@ -68,6 +68,10 @@ class KwcNewsletter_Kwc_Newsletter_Detail_RecipientsController extends KwcNewsle
         $mailComponent = $this->_getMailComponent();
         $rs = $mailComponent->getComponent()->getRecipientSources();
         foreach(array_keys($rs) as $key) {
+            if ($key == $this->getParam('subscribeModelKey')) {
+                $this->_model = Kwf_Model_Abstract::getInstance($rs[$key]['model']);
+            }
+
             if (isset($rs[$key]['select']) && ($rs[$key]['model'] == get_class($this->_getModel()))) {
                 $ret->merge($rs[$key]['select']);
             }
