@@ -24,6 +24,13 @@ class KwcNewsletter_Kwc_Newsletter_Detail_QueueLogsController extends Kwf_Contro
             )
         );
 
+        $this->_filters['text'] = array(
+            'type' => 'TextField',
+            'width' => 200,
+            'label' => trlKwf('Filter') . ':',
+            'skipWhere' => true,
+        );
+
         $this->_columns->add(new Kwf_Grid_Column('email', trlKwf('E-Mail'), 200))
             ->setData(new KwcNewsletter_Kwc_Newsletter_Detail_UserData('email'));
         $this->_columns->add(new Kwf_Grid_Column('firstname', trlKwf('Firstname'), 140))
@@ -38,6 +45,17 @@ class KwcNewsletter_Kwc_Newsletter_Detail_QueueLogsController extends Kwf_Contro
     {
         $select = parent::_getSelect();
         $select->whereEquals('newsletter_id', $this->_getNewsletterRow()->id);
+
+        if ($query = $this->getParam('query')) {
+            $querySelect = new Kwf_Model_Select();
+            $querySelect->where(new Kwf_Model_Select_Expr_Or(array(
+                new Kwf_Model_Select_Expr_Contains('email', $query),
+                new Kwf_Model_Select_Expr_Contains('firstname', $query),
+                new Kwf_Model_Select_Expr_Contains('lastname', $query),
+            )));
+            $select->where(new Kwf_Model_Select_Expr_Parent_Contains('Subscriber', $querySelect));
+        }
+
         return $select;
     }
 

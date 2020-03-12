@@ -13,6 +13,10 @@ class NewsletterQueueLogs extends \Kwf_Model_Db_Proxy
             'refModelClass' => 'KwcNewsletter\Bundle\Model\Newsletters'
         );
 
+        $this->_referenceMap['Subscriber'] = array(
+            'column' => 'recipient_id',
+            'refModelClass' => 'KwcNewsletter\Bundle\Model\Subscribers'
+        );
         parent::_init();
     }
 }
