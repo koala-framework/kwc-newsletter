@@ -44,7 +44,8 @@ class KwcNewsletter_Kwc_Newsletter_Detail_ExtConfig extends Kwf_Component_Abstra
                     'recipientsControllerUrl' => $this->getControllerUrl('Recipients'),
                     'authedUserEmail'       => Kwf_Registry::get('userModel')->getAuthedUser() ? Kwf_Registry::get('userModel')->getAuthedUser()->email : '',
                     'title'                 => trlKwf('Preview'),
-                    'recipientSources'      => $this->_getRecipientSources()
+                    'recipientSources'      => $this->_getRecipientSources(),
+                    'newsletterSources'     => $this->_getNewsletterSources(),
                 ),
                 'mailing' => array(
                     'xtype'                 => 'kwc.newsletter.recipients',
@@ -54,7 +55,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_ExtConfig extends Kwf_Component_Abstra
                         'region' => 'center',
                         'xtype' => 'kwf.tabpanel',
                         'activeTab' => 0,
-                        'tabs' => $this->_getRecipientPanelTabs()
+                        'tabs' => $this->_getNewsletterSources()
                     ),
                     'recipientsQueuePanel' => array(
                         'title' => trlKwf('Queue'),
@@ -113,7 +114,8 @@ class KwcNewsletter_Kwc_Newsletter_Detail_ExtConfig extends Kwf_Component_Abstra
         return $recipientSources;
     }
 
-    protected function _getRecipientPanelTabs()
+
+    protected function _getNewsletterSources()
     {
         $newsletterComponent = Kwf_Component_Data_Root::getInstance()
             ->getComponentByDbId($_REQUEST['componentId'], array('ignoreVisible' => true));
