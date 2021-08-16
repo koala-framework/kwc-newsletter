@@ -136,6 +136,7 @@ class ImportSubscribers extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        ini_set('memory_limit', -1);
         $this->startQuestions($input, $output);
 
         $this->parser->setFile($this->file);
