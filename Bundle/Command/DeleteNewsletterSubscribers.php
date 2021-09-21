@@ -84,15 +84,15 @@ class DeleteNewsletterSubscribers extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        ini_set('memory_limit', -1);
         $helper = $this->getHelper('question');
+        $batchSize = 5000;
 
         $subscriberSelect = new \Kwf_Model_Select();
         $subscriberSelect->whereEquals('newsletter_component_id', $input->getOption('newsletterComponentId'));
         $subscriberSelect->whereEquals('newsletter_source', $input->getOption('newsletterSource'));
+        $subscriberSelect->limit($batchSize);
 
-        $subscribers = $this->subscribers->getRows($subscriberSelect);
-        $subscribersCount = count($subscribers);
+        $subscribersCount = $this->subscribers->countRows($subscriberSelect);
 
         if (!$subscribersCount) {
             throw new RuntimeException("There are no subscribers with component-id \"{$input->getOption('newsletterComponentId')}\" and newsletter-source \"{$input->getOption('newsletterSource')}\".");
@@ -106,18 +106,22 @@ class DeleteNewsletterSubscribers extends Command
             exit;
         }
 
+        $amountOfBatches = ceil($subscribersCount / $batchSize);
+
         $progressBar = new ProgressBar($output, $subscribersCount);
         $progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s%');
         $progressBar->start();
 
-        \Kwf_Registry::get('db')->beginTransaction();
+        for ($currentBatch = 1; $currentBatch <= $amountOfBatches; $currentBatch++) {
+            if ($currentBatch > 1) {
+                \Kwf_Model_Abstract::clearAllRows();
+            }
 
-        foreach ($subscribers as $subscriberRow) {
-            $subscriberRow->deleteAndHash();
-            $progressBar->advance();
+            foreach ($this->subscribers->getRows($subscriberSelect) as $subscriberRow) {
+                $subscriberRow->deleteAndHash();
+                $progressBar->advance();
+            }
         }
-
-        \Kwf_Registry::get('db')->commit();
 
         $progressBar->finish();
         $output->writeln("Deleted {$subscribersCount} subscribers.", OutputInterface::VERBOSITY_NORMAL);
