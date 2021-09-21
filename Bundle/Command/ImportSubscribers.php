@@ -136,7 +136,6 @@ class ImportSubscribers extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        ini_set('memory_limit', -1);
         $this->startQuestions($input, $output);
 
         $this->parser->setFile($this->file);
@@ -150,11 +149,15 @@ class ImportSubscribers extends Command
         $this->progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s%');
         $this->progressBar->start();
 
-        foreach ($this->parser as $data) {
+        foreach ($this->parser as $index => $data) {
             $this->progressBar->advance();
 
             if ($this->excluderManager->isExcluded($data['email'])) continue;
             $subscriber->save($data);
+
+            if ($index > 0 && $index % 100 === 0) {
+                \Kwf_Model_Abstract::clearAllRows();
+            }
         }
 
         $this->progressBar->finish();
