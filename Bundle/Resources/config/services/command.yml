@@ -22,3 +22,9 @@ services:
         arguments: [@kwc_newsletter.model.newsletters, @kwc_newsletter.model.subscribers_to_categories, @kwc_newsletter.model.newsletter_subscriber_logs]
         tags:
             - { name: 'console.command' }
+
+    kwc_newsletter.command.delete_newsletter_subscribers:
+        class: KwcNewsletter\Bundle\Command\DeleteNewsletterSubscribers
+        arguments: [@kwc_newsletter.model.subscribers]
+        tags:
+            - { name: 'console.command' }
