@@ -5,6 +5,7 @@ class KwcNewsletter_Kwc_Newsletter_Detail_Mail_Paragraphs_Component extends Kwc_
     {
         $ret = parent::getSettings($param);
         $ret['componentName'] = trlKwfStatic('Mail');
+        $ret['extConfig'] = 'KwcNewsletter_Kwc_Newsletter_Detail_Mail_Paragraphs_ExtConfig';
         $ret['generators']['paragraphs']['component'] = array();
         $ret['generators']['paragraphs']['component']['textImage'] =
             'KwcNewsletter_Kwc_Newsletter_Detail_Mail_Paragraphs_TextImage_Component';
