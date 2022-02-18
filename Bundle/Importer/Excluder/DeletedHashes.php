@@ -13,19 +13,21 @@ class DeletedHashes implements ExcluderInterface
     /**
      * @var array
      */
-    private $deletedHashes = array();
+    private $deletedHashes = null;
 
     public function __construct(DeletedSubscriberHashes $model)
     {
         $this->model = $model;
-
-        foreach ($model->export(\Kwf_Model_Abstract::FORMAT_ARRAY) as $row) {
-            $this->deletedHashes[$row['id']] = true;
-        }
     }
 
     public function isExcluded($email)
     {
+        if (!$this->deletedHashes) {
+            $this->deletedHashes = array();
+            foreach ($model->export(\Kwf_Model_Abstract::FORMAT_ARRAY) as $row) {
+                $this->deletedHashes[$row['id']] = true;
+            }
+        }
         return array_key_exists(sha1($email), $this->deletedHashes);
     }
 }
